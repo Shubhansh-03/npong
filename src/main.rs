@@ -14,23 +14,23 @@ use winit::{
 const WIDTH: u32 = 400;
 const HEIGHT: u32 = 300;
 
+// Using Arc for Window because references to Window is going to used for everything (was facing an
+// issue with lifetimes so had to look into Smart Pointers)
 #[derive(Default)]
 struct App {
-    window: Option<Window>,
+    window: Option<Arc<Window>>,
+    pixels: Option<Pixels<'static>>,
 }
 
 // This is the ApplicationHandler trait that is used by winit to update window and everything
 impl ApplicationHandler for App {
+    // Acc to my understanding (not very good yet) this function runs only once when window is
+    // being created for the first time for my use case. (Can run multiple times)
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
-        // self.window = Some(
-        //     event_loop
-        //         .create_window(Window::default_attributes().with_title("Love you macha"))
-        //         .unwrap(),
-        // );
-        self.window = {
+        let window = {
             let size = LogicalSize::new(WIDTH as f64, HEIGHT as f64);
             let scaled_size = LogicalSize::new(WIDTH as f64 * 3.0, HEIGHT as f64 * 3.0);
-            Some(
+            Arc::new(
                 event_loop
                     .create_window(
                         Window::default_attributes()
@@ -41,17 +41,21 @@ impl ApplicationHandler for App {
                     .unwrap(),
             )
         };
-    // Pixels for filling the frame unsure what's happening rn, copied from Conway's game of life
-    // in Pixels' Github
-        // let mut pixels = {
-        //     let window_size = self.window.as_ref().unwrap().inner_size();
-        //     let surface_texture = SurfaceTexture::new(
-        //         window_size.width,
-        //         window_size.height,
-        //         self.window.as_ref().unwrap(),
-        //     );
-        //     Pixels::new(WIDTH, HEIGHT, surface_texture).unwrap()
-        // };
+
+        self.window = Some(window);
+
+        let pixels = {
+            let window_size = self.window.as_ref().unwrap().inner_size();
+            let surface_texture = SurfaceTexture::new(
+                window_size.width,
+                window_size.height,
+                Arc::clone(self.window.as_ref().unwrap()),
+            );
+            let mut p = Pixels::new(WIDTH, HEIGHT, surface_texture).expect("Pixel creation failed");
+            p.clear_color(pixels::wgpu::Color::RED);
+            p
+        };
+        self.pixels = Some(pixels)
     }
 
     fn window_event(&mut self, event_loop: &ActiveEventLoop, id: WindowId, event: WindowEvent) {
@@ -61,17 +65,12 @@ impl ApplicationHandler for App {
                 event_loop.exit();
             }
             WindowEvent::RedrawRequested => {
-                // let size = self.window.as_ref().unwrap().inner_size();
-                // let surface_texture =
-                //     SurfaceTexture::new(size.width, size.height, self.window.as_ref().unwrap());
-                // Redraw the application.
-                //
-                // It's preferable for applications that do not render continuously to render in
-                // this event rather than in AboutToWait, since rendering in here allows
-                // the program to gracefully handle redraws requested by the OS.
-
-                // Draw.
-
+                // Wanna know how often this runs
+                println!("Got a redraw request!!");
+                if let Err(err) = self.pixels.as_ref().unwrap().render() {
+                    dbg!(err);
+                    return;
+                }
                 // Queue a RedrawRequested event.
                 //
                 // You only need to call this if you've determined that you need to redraw in
@@ -100,3 +99,4 @@ fn main() {
     let mut app = App::default();
     let _x = event_loop.run_app(&mut app);
 }
+
