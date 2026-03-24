@@ -33,6 +33,7 @@ impl ApplicationHandler for App {
     // Acc to my understanding (not very good yet) this function runs only once when window is
     // being created for the first time for my use case. (Can run multiple times)
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
+        println!("why");
         let window = {
             let size = LogicalSize::new(WIDTH as f64, HEIGHT as f64);
             let scaled_size = LogicalSize::new(WIDTH as f64 * 4.0, HEIGHT as f64 * 4.0);
@@ -103,8 +104,10 @@ impl ApplicationHandler for App {
                 event_loop.exit();
             }
             WindowEvent::RedrawRequested => {
-                // let frame = self.pixels.as_mut().unwrap().frame_mut();
-                // draw_rect(frame, 0, 0, 10, 10);
+                // println!("drawing");
+                self.state
+                    .clear_screen(self.pixels.as_mut().unwrap().frame_mut());
+                self.state.draw(self.pixels.as_mut().unwrap().frame_mut());
                 if let Err(err) = self.pixels.as_ref().unwrap().render() {
                     dbg!(err);
                     return;
@@ -114,6 +117,68 @@ impl ApplicationHandler for App {
                 // You only need to call this if you've determined that you need to redraw in
                 // applications which do not always need to. Applications that redraw continuously
                 // can render here instead.
+                self.window.as_ref().unwrap().request_redraw();
+            }
+            // TODO: Learn to use if let you dumass. The below code would be so much more simpler
+            // then. Don't forget to change this later
+            WindowEvent::KeyboardInput { event, .. } => {
+                // TODO: Dump all this code into paddle module. This place is a shit show rn
+                match &event.physical_key {
+                    winit::keyboard::PhysicalKey::Code(key) => match key {
+                        KeyCode::KeyD => {
+                            // println!("hehe");
+                            let paddle = self.state.objects.get_mut(0).unwrap();
+                            match paddle {
+                                Object::Paddle(paddle) => {
+                                    paddle.x += 1;
+                                }
+                                _ => {
+                                    todo!()
+                                }
+                            }
+                        }
+                        KeyCode::KeyA => {
+                            // println!("hehe");
+                            let paddle = self.state.objects.get_mut(0).unwrap();
+                            match paddle {
+                                Object::Paddle(paddle) => {
+                                    paddle.x -= 1;
+                                }
+                                _ => {
+                                    todo!()
+                                }
+                            }
+                        }
+                        KeyCode::ArrowLeft => {
+                            // println!("hehe");
+                            let paddle = self.state.objects.get_mut(1).unwrap();
+                            match paddle {
+                                Object::Paddle(paddle) => {
+                                    paddle.x -= 1;
+                                }
+                                _ => {
+                                    todo!()
+                                }
+                            }
+                        }
+                        KeyCode::ArrowRight => {
+                            // println!("hehe");
+                            let paddle = self.state.objects.get_mut(1).unwrap();
+                            match paddle {
+                                Object::Paddle(paddle) => {
+                                    paddle.x += 1;
+                                }
+                                _ => {
+                                    todo!()
+                                }
+                            }
+                        }
+                        _ => {}
+                    },
+                    _ => {
+                        todo!();
+                    }
+                }
                 self.window.as_ref().unwrap().request_redraw();
             }
             _ => (),
