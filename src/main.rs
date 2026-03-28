@@ -16,8 +16,8 @@ use winit::{
 pub mod gamestate;
 pub mod object;
 
-const WIDTH: u32 = 400;
-const HEIGHT: u32 = 300;
+const WIDTH: u32 = 1200;
+const HEIGHT: u32 = 900;
 
 // Using Arc for Window because references to Window is going to used for everything (was facing an
 // issue with lifetimes so had to look into Smart Pointers)
@@ -33,10 +33,9 @@ impl ApplicationHandler for App {
     // Acc to my understanding (not very good yet) this function runs only once when window is
     // being created for the first time for my use case. (Can run multiple times)
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
-        println!("why");
         let window = {
-            let size = LogicalSize::new(WIDTH as f64, HEIGHT as f64);
-            let scaled_size = LogicalSize::new(WIDTH as f64 * 4.0, HEIGHT as f64 * 4.0);
+            let size = LogicalSize::new(400.0, 300.0);
+            let scaled_size = LogicalSize::new(WIDTH as f64 * 3.0, HEIGHT as f64 * 3.0);
             Arc::new(
                 event_loop
                     .create_window(
@@ -71,26 +70,32 @@ impl ApplicationHandler for App {
 
         let gamestate = GameState {
             players: 2,
-            objects: vec![
-                Object::Paddle(object::paddle::Paddle {
-                    x: 185,
-                    y: 290,
-                    height: 5,
-                    width: 30,
-                }),
-                Object::Paddle(object::paddle::Paddle {
-                    x: 185,
-                    y: 5,
-                    height: 5,
-                    width: 30,
-                }),
-                Object::Ball(object::ball::Ball {
-                    x: 185,
-                    y: 5,
-                    radius: 4,
-                    vx: 0.0,
-                    vy: 0.0,
-                }),
+            paddles: [
+                object::paddle::Paddle {
+                    x: ((WIDTH - WIDTH / 30) / 2) as i32,
+                    y: (HEIGHT - HEIGHT / 30) as i32,
+                    height: HEIGHT / 60,
+                    width: WIDTH / 15,
+                },
+                object::paddle::Paddle {
+                    x: ((WIDTH - WIDTH / 30) / 2) as i32,
+                    y: (HEIGHT / 60) as i32,
+                    height: HEIGHT / 60,
+                    width: WIDTH / 15,
+                },
+            ],
+            ball: object::ball::Ball {
+                radius: 15,
+                x: (WIDTH / 2) as i32,
+                y: (HEIGHT / 2) as i32,
+                vx: 0.0,
+                vy: 0.0,
+            },
+            walls: [
+                object::wall::Wall::default(),
+                object::wall::Wall::default(),
+                object::wall::Wall::default(),
+                object::wall::Wall::default(),
             ],
         };
         self.state = gamestate;
@@ -122,56 +127,19 @@ impl ApplicationHandler for App {
             // TODO: Learn to use if let you dumass. The below code would be so much more simpler
             // then. Don't forget to change this later
             WindowEvent::KeyboardInput { event, .. } => {
-                // TODO: Dump all this code into paddle module. This place is a shit show rn
                 match &event.physical_key {
                     winit::keyboard::PhysicalKey::Code(key) => match key {
-                        KeyCode::KeyD => {
-                            // println!("hehe");
-                            let paddle = self.state.objects.get_mut(0).unwrap();
-                            match paddle {
-                                Object::Paddle(paddle) => {
-                                    paddle.x += 1;
-                                }
-                                _ => {
-                                    todo!()
-                                }
-                            }
-                        }
                         KeyCode::KeyA => {
-                            // println!("hehe");
-                            let paddle = self.state.objects.get_mut(0).unwrap();
-                            match paddle {
-                                Object::Paddle(paddle) => {
-                                    paddle.x -= 1;
-                                }
-                                _ => {
-                                    todo!()
-                                }
-                            }
+                            self.state.paddles.get_mut(0).unwrap().left_shift();
+                        }
+                        KeyCode::KeyD => {
+                            self.state.paddles.get_mut(0).unwrap().right_shift();
                         }
                         KeyCode::ArrowLeft => {
-                            // println!("hehe");
-                            let paddle = self.state.objects.get_mut(1).unwrap();
-                            match paddle {
-                                Object::Paddle(paddle) => {
-                                    paddle.x -= 1;
-                                }
-                                _ => {
-                                    todo!()
-                                }
-                            }
+                            self.state.paddles.get_mut(1).unwrap().left_shift();
                         }
                         KeyCode::ArrowRight => {
-                            // println!("hehe");
-                            let paddle = self.state.objects.get_mut(1).unwrap();
-                            match paddle {
-                                Object::Paddle(paddle) => {
-                                    paddle.x += 1;
-                                }
-                                _ => {
-                                    todo!()
-                                }
-                            }
+                            self.state.paddles.get_mut(1).unwrap().right_shift();
                         }
                         _ => {}
                     },

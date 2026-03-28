@@ -1,3 +1,4 @@
+#[derive(Default)]
 pub struct Wall {
     x: f32,
     y: f32,
