@@ -1,7 +1,6 @@
 use gamestate::GameState;
-use object::Object;
 use pixels::{Error, Pixels, SurfaceTexture};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use winit::application::ApplicationHandler;
 use winit::event_loop::{ActiveEventLoop, ControlFlow};
 use winit::window::WindowId;
@@ -26,6 +25,7 @@ struct App {
     window: Option<Arc<Window>>,
     pixels: Option<Pixels<'static>>,
     state: GameState,
+    // state: Arc<GameState>,
 }
 
 // This is the ApplicationHandler trait that is used by winit to update window and everything
@@ -72,13 +72,13 @@ impl ApplicationHandler for App {
             players: 2,
             paddles: [
                 object::paddle::Paddle {
-                    x: ((WIDTH - WIDTH / 30) / 2) as i32,
+                    x: ((WIDTH - WIDTH / 15) / 2) as i32,
                     y: (HEIGHT - HEIGHT / 30) as i32,
                     height: HEIGHT / 60,
                     width: WIDTH / 15,
                 },
                 object::paddle::Paddle {
-                    x: ((WIDTH - WIDTH / 30) / 2) as i32,
+                    x: ((WIDTH - WIDTH / 15) / 2) as i32,
                     y: (HEIGHT / 60) as i32,
                     height: HEIGHT / 60,
                     width: WIDTH / 15,
@@ -88,8 +88,8 @@ impl ApplicationHandler for App {
                 radius: 15,
                 x: (WIDTH / 2) as i32,
                 y: (HEIGHT / 2) as i32,
-                vx: 0.0,
-                vy: 0.0,
+                vx: 4.0,
+                vy: 3.0,
             },
             walls: [
                 object::wall::Wall::default(),
@@ -112,6 +112,7 @@ impl ApplicationHandler for App {
                 // println!("drawing");
                 self.state
                     .clear_screen(self.pixels.as_mut().unwrap().frame_mut());
+                self.state.update();
                 self.state.draw(self.pixels.as_mut().unwrap().frame_mut());
                 if let Err(err) = self.pixels.as_ref().unwrap().render() {
                     dbg!(err);

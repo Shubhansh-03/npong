@@ -8,9 +8,9 @@ pub struct Paddle {
 
 impl Paddle {
     pub fn left_shift(&mut self) {
-        self.x -= 1;
+        self.x -= 5;
     }
     pub fn right_shift(&mut self) {
-        self.x += 1;
+        self.x += 5;
     }
 }

@@ -6,6 +6,7 @@ My first big project in Rust. Trying to maximize learning through this. (Feature
 
 - Game initialization
 - Paddle movement
+- Ball rendering and collisions
 
 ## Up next
 

@@ -1,5 +1,4 @@
-// use crate::HEIGHT;
-use crate::WIDTH;
+use crate::{HEIGHT, WIDTH};
 
 #[derive(Default)]
 pub struct Ball {
@@ -22,10 +21,28 @@ impl Ball {
                 }
                 let px = self.x + dx;
                 let py = self.y + dy;
+                if px < 0 || py < 0 || px >= WIDTH as i32 || py >= HEIGHT as i32 {
+                    continue;
+                }
 
                 let idx = ((py as u32 * WIDTH + px as u32) * 4) as usize;
-                frame[idx..idx + 4].copy_from_slice(&[255, 0, 255, 255]);
+                // frame[idx..idx + 4].copy_from_slice(&[255, 0, 255, 255]);
+                frame[idx..idx + 4].copy_from_slice(&[
+                    0,
+                    ((idx) % 100 + 100) as u8,
+                    ((idx) % 100 + 100) as u8,
+                    255,
+                ]);
             }
         }
+    }
+
+    pub fn update(&mut self) {
+        let (mut tx, mut ty) = (self.x, self.y);
+        tx += self.vx as i32;
+        ty += self.vy as i32;
+
+        self.x = tx;
+        self.y = ty;
     }
 }
