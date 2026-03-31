@@ -13,6 +13,8 @@ My first big project in Rust. Trying to maximize learning through this. (Feature
 - Separating game updates from rendering (separating game time)
 - Both paddle work at the same time
 - Proper code format 😢
+- Acceleration for the paddle
+- Ball bouncing randomizing
 
 ## Reading Materials
 

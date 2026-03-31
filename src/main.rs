@@ -129,7 +129,6 @@ impl ApplicationHandler for App {
                 event_loop.exit();
             }
             WindowEvent::RedrawRequested => {
-                println!("drawing");
                 self.state
                     .clear_screen(self.pixels.as_mut().unwrap().frame_mut());
                 self.state.update();

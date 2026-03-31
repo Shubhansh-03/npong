@@ -56,6 +56,7 @@ impl GameState {
     }
 
     // Temporary collision code. Have to implement a better collision checker for the future
+    // TODO: Fix the paddle collision bug also proper wall collisions
     pub fn check_collision(&mut self) {
         let mut collision = false;
         let ballx = self.ball.x;
@@ -77,19 +78,19 @@ impl GameState {
             self.paddles.get(1).unwrap().x + self.paddles.get(1).unwrap().width as i32;
 
         // Boundary collisions
-        if balls >= HEIGHT as i32 {
+        if balls >= (HEIGHT - 10) as i32 {
             self.ball.vy = -self.ball.vy;
             collision = true;
         }
-        if (balln) <= 0 {
+        if (balln) <= 10 {
             self.ball.vy = -self.ball.vy;
             collision = true;
         }
-        if balle >= WIDTH as i32 {
+        if balle >= (WIDTH - 10) as i32 {
             self.ball.vx = -self.ball.vx;
             collision = true;
         }
-        if (ballw) <= 0 {
+        if (ballw) <= 10 {
             self.ball.vx = -self.ball.vx;
             collision = true;
         }
