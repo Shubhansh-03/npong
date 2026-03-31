@@ -11,6 +11,7 @@ My first big project in Rust. Trying to maximize learning through this. (Feature
 ## Up next
 
 - Separating game updates from rendering (separating game time)
+- Both paddle work at the same time
 - Proper code format 😢
 
 ## Reading Materials

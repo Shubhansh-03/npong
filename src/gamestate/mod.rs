@@ -14,20 +14,7 @@ pub struct GameState {
 impl GameState {
     pub fn draw(&self, frame: &mut [u8]) {
         for paddle in self.paddles.iter() {
-            let (x, y, h, w) = (paddle.x, paddle.y, paddle.height, paddle.width);
-            for dy in 0..h {
-                for dx in 0..w {
-                    let px = x + dx as i32;
-                    let py = y + dy as i32;
-
-                    if px < 0 || py < 0 || px >= WIDTH as i32 || py >= HEIGHT as i32 {
-                        continue;
-                    }
-                    let idx = ((py as u32 * WIDTH + px as u32) * 4) as usize;
-
-                    frame[idx..idx + 4].copy_from_slice(&[255, 255, 255, 255]);
-                }
-            }
+            paddle.draw(frame);
         }
         self.ball.draw(frame);
     }
