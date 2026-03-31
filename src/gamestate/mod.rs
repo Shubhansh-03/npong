@@ -12,6 +12,60 @@ pub struct GameState {
 }
 
 impl GameState {
+    pub fn new() -> Self {
+        let gamestate = GameState {
+            players: 2,
+            paddles: [
+                Paddle {
+                    x: ((WIDTH - WIDTH / 15) / 2) as i32,
+                    y: (HEIGHT - HEIGHT / 30) as i32,
+                    height: HEIGHT / 60,
+                    width: WIDTH / 15,
+                },
+                Paddle {
+                    x: ((WIDTH - WIDTH / 15) / 2) as i32,
+                    y: (HEIGHT / 60) as i32,
+                    height: HEIGHT / 60,
+                    width: WIDTH / 15,
+                },
+            ],
+            ball: Ball {
+                radius: 15,
+                x: (WIDTH / 2) as i32,
+                y: (HEIGHT / 2) as i32,
+                vx: 4.0,
+                vy: 3.0,
+            },
+            walls: [
+                Wall {
+                    x: 0 as i32,
+                    y: 0 as i32,
+                    height: HEIGHT,
+                    width: 10,
+                },
+                Wall {
+                    x: (WIDTH - 10) as i32,
+                    y: 0 as i32,
+                    height: HEIGHT,
+                    width: 10,
+                },
+                Wall {
+                    x: 0 as i32,
+                    y: 0 as i32,
+                    height: 10,
+                    width: WIDTH,
+                },
+                Wall {
+                    x: 0 as i32,
+                    y: (HEIGHT - 10) as i32,
+                    height: 10,
+                    width: WIDTH,
+                },
+            ],
+        };
+        gamestate
+    }
+
     pub fn draw(&self, frame: &mut [u8]) {
         for paddle in self.paddles.iter() {
             paddle.draw(frame);
@@ -52,12 +106,12 @@ impl GameState {
     pub fn update(&mut self) {
         self.ball.update();
 
-        self.check_collision();
+        self.collision();
     }
 
     // Temporary collision code. Have to implement a better collision checker for the future
     // TODO: Fix the paddle collision bug also proper wall collisions
-    pub fn check_collision(&mut self) {
+    pub fn collision(&mut self) {
         let mut collision = false;
         let ballx = self.ball.x;
         let bally = self.ball.y;
@@ -100,8 +154,23 @@ impl GameState {
             collision = true;
         }
 
+        if balls >= paddle1 && (balle >= paddle1left && ballw <= paddle1right) {
+            self.ball.vx = -self.ball.vx;
+            collision = true;
+        }
+
+        // if balls >= paddle1 && (ballw == paddle1right) {
+        //     self.ball.vx = -self.ball.vx;
+        //     collision = true;
+        // }
+
         if balln <= paddle2 && (ballx <= paddle2right && ballx >= paddle2left) {
             self.ball.vy = -self.ball.vy;
+            collision = true;
+        }
+
+        if balls >= paddle1 && (balle >= paddle2left && ballw <= paddle2right) {
+            self.ball.vx = -self.ball.vx;
             collision = true;
         }
 

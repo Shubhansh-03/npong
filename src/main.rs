@@ -68,57 +68,7 @@ impl ApplicationHandler for App {
         };
         self.pixels = Some(pixels);
 
-        let gamestate = GameState {
-            players: 2,
-            paddles: [
-                object::paddle::Paddle {
-                    x: ((WIDTH - WIDTH / 15) / 2) as i32,
-                    y: (HEIGHT - HEIGHT / 30) as i32,
-                    height: HEIGHT / 60,
-                    width: WIDTH / 15,
-                },
-                object::paddle::Paddle {
-                    x: ((WIDTH - WIDTH / 15) / 2) as i32,
-                    y: (HEIGHT / 60) as i32,
-                    height: HEIGHT / 60,
-                    width: WIDTH / 15,
-                },
-            ],
-            ball: object::ball::Ball {
-                radius: 15,
-                x: (WIDTH / 2) as i32,
-                y: (HEIGHT / 2) as i32,
-                vx: 4.0,
-                vy: 3.0,
-            },
-            walls: [
-                object::wall::Wall {
-                    x: 0 as i32,
-                    y: 0 as i32,
-                    height: HEIGHT,
-                    width: 10,
-                },
-                object::wall::Wall {
-                    x: (WIDTH - 10) as i32,
-                    y: 0 as i32,
-                    height: HEIGHT,
-                    width: 10,
-                },
-                object::wall::Wall {
-                    x: 0 as i32,
-                    y: 0 as i32,
-                    height: 10,
-                    width: WIDTH,
-                },
-                object::wall::Wall {
-                    x: 0 as i32,
-                    y: (HEIGHT - 10) as i32,
-                    height: 10,
-                    width: WIDTH,
-                },
-            ],
-        };
-        self.state = gamestate;
+        self.state = GameState::new();
         self.state.draw(self.pixels.as_mut().unwrap().frame_mut());
     }
 
