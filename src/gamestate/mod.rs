@@ -17,6 +17,11 @@ impl GameState {
             paddle.draw(frame);
         }
         self.ball.draw(frame);
+
+        self.walls.get(0).unwrap().draw(frame);
+        self.walls.get(1).unwrap().draw(frame);
+        self.walls.get(2).unwrap().draw(frame);
+        self.walls.get(3).unwrap().draw(frame);
     }
 
     // Wrote code to clear frame by myself. (Could not find the library method for it TT )
@@ -34,9 +39,9 @@ impl GameState {
 
                 // Funky color scheme in the frame
                 frame[idx..idx + 4].copy_from_slice(&[
-                    ((dx / 10) % 255) as u8,
-                    ((dy / 10) % 255) as u8,
-                    (((dx + dy) / 10) % 255) as u8,
+                    ((dx / 15) % 255) as u8,
+                    ((dy / 15) % 255) as u8,
+                    (((dx + dy) / 15) % 255) as u8,
                     255,
                 ]);
                 // frame[idx..idx + 4].copy_from_slice(&[(5) as u8, (25) as u8, (255) as u8, 255]);

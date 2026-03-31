@@ -92,10 +92,30 @@ impl ApplicationHandler for App {
                 vy: 3.0,
             },
             walls: [
-                object::wall::Wall::default(),
-                object::wall::Wall::default(),
-                object::wall::Wall::default(),
-                object::wall::Wall::default(),
+                object::wall::Wall {
+                    x: 0 as i32,
+                    y: 0 as i32,
+                    height: HEIGHT,
+                    width: 10,
+                },
+                object::wall::Wall {
+                    x: (WIDTH - 10) as i32,
+                    y: 0 as i32,
+                    height: HEIGHT,
+                    width: 10,
+                },
+                object::wall::Wall {
+                    x: 0 as i32,
+                    y: 0 as i32,
+                    height: 10,
+                    width: WIDTH,
+                },
+                object::wall::Wall {
+                    x: 0 as i32,
+                    y: (HEIGHT - 10) as i32,
+                    height: 10,
+                    width: WIDTH,
+                },
             ],
         };
         self.state = gamestate;
