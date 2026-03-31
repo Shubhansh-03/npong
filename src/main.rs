@@ -1,6 +1,8 @@
 use gamestate::GameState;
 use pixels::{Error, Pixels, SurfaceTexture};
 use std::sync::{Arc, Mutex};
+use std::thread;
+use std::time::{Duration, Instant};
 use winit::application::ApplicationHandler;
 use winit::event_loop::{ActiveEventLoop, ControlFlow};
 use winit::window::WindowId;
@@ -24,8 +26,8 @@ const HEIGHT: u32 = 900;
 struct App {
     window: Option<Arc<Window>>,
     pixels: Option<Pixels<'static>>,
-    state: GameState,
-    // state: Arc<GameState>,
+    state: Arc<Mutex<GameState>>,
+    count: u32,
 }
 
 // This is the ApplicationHandler trait that is used by winit to update window and everything
@@ -59,30 +61,38 @@ impl ApplicationHandler for App {
             );
             let mut p = Pixels::new(WIDTH, HEIGHT, surface_texture).expect("Pixel creation failed");
             p.clear_color(pixels::wgpu::Color {
-                r: 0.004,
+                r: 0.008,
                 g: 0.0,
-                b: 0.008,
+                b: 0.01,
                 a: 1.0,
             });
             p
         };
         self.pixels = Some(pixels);
 
-        self.state = GameState::new();
-        self.state.draw(self.pixels.as_mut().unwrap().frame_mut());
+        // self.state.draw(self.pixels.as_mut().unwrap().frame_mut());
+        self.state
+            .lock()
+            .unwrap()
+            .draw(self.pixels.as_mut().unwrap().frame_mut());
     }
 
     fn window_event(&mut self, event_loop: &ActiveEventLoop, id: WindowId, event: WindowEvent) {
         match event {
             WindowEvent::CloseRequested => {
-                println!("The close button was pressed; stopping");
+                println!(
+                    "The close button was pressed; stopping. Frames: {}",
+                    self.count
+                );
                 event_loop.exit();
             }
             WindowEvent::RedrawRequested => {
-                self.state
-                    .clear_screen(self.pixels.as_mut().unwrap().frame_mut());
-                self.state.update();
-                self.state.draw(self.pixels.as_mut().unwrap().frame_mut());
+                // self.count += 1;
+                {
+                    let gs = self.state.lock().unwrap();
+                    gs.clear_screen(self.pixels.as_mut().unwrap().frame_mut());
+                    gs.draw(self.pixels.as_mut().unwrap().frame_mut());
+                }
                 if let Err(err) = self.pixels.as_ref().unwrap().render() {
                     dbg!(err);
                     return;
@@ -100,16 +110,40 @@ impl ApplicationHandler for App {
                 match &event.physical_key {
                     winit::keyboard::PhysicalKey::Code(key) => match key {
                         KeyCode::KeyA => {
-                            self.state.paddles.get_mut(0).unwrap().left_shift();
+                            self.state
+                                .lock()
+                                .unwrap()
+                                .paddles
+                                .get_mut(0)
+                                .unwrap()
+                                .left_shift();
                         }
                         KeyCode::KeyD => {
-                            self.state.paddles.get_mut(0).unwrap().right_shift();
+                            self.state
+                                .lock()
+                                .unwrap()
+                                .paddles
+                                .get_mut(0)
+                                .unwrap()
+                                .right_shift();
                         }
                         KeyCode::ArrowLeft => {
-                            self.state.paddles.get_mut(1).unwrap().left_shift();
+                            self.state
+                                .lock()
+                                .unwrap()
+                                .paddles
+                                .get_mut(1)
+                                .unwrap()
+                                .left_shift();
                         }
                         KeyCode::ArrowRight => {
-                            self.state.paddles.get_mut(1).unwrap().right_shift();
+                            self.state
+                                .lock()
+                                .unwrap()
+                                .paddles
+                                .get_mut(1)
+                                .unwrap()
+                                .right_shift();
                         }
                         _ => {}
                     },
@@ -126,17 +160,33 @@ impl ApplicationHandler for App {
 
 fn main() {
     let event_loop = EventLoop::new().unwrap();
-    // let window = Window::new(&event_loop).unwrap();
 
     // ControlFlow::Poll continuously runs the event loop, even if the OS hasn't
     // dispatched any events. This is ideal for games and similar applications.
     event_loop.set_control_flow(ControlFlow::Poll);
 
-    // ControlFlow::Wait pauses the event loop if no events are available to process.
-    // This is ideal for non-game applications that only update in response to user
-    // input, and uses significantly less power/CPU time than ControlFlow::Poll.
-    // event_loop.set_control_flow(ControlFlow::Wait);
+    let state = Arc::new(Mutex::new(GameState::new()));
+    let mut app = App {
+        state,
+        ..Default::default()
+    };
 
-    let mut app = App::default();
+    let state = Arc::clone(&app.state);
+    let tick = Duration::from_millis(16);
+    thread::spawn(move || {
+        loop {
+            let start = Instant::now();
+            {
+                let mut gs = state.lock().unwrap();
+                gs.update();
+            }
+
+            let elapsed = start.elapsed();
+            if elapsed < tick {
+                thread::sleep(tick - elapsed);
+            }
+        }
+    });
+
     let _x = event_loop.run_app(&mut app);
 }

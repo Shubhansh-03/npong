@@ -13,7 +13,7 @@ pub struct GameState {
 
 impl GameState {
     pub fn new() -> Self {
-        let gamestate = GameState {
+        GameState {
             players: 2,
             paddles: [
                 Paddle {
@@ -38,32 +38,31 @@ impl GameState {
             },
             walls: [
                 Wall {
-                    x: 0 as i32,
-                    y: 0 as i32,
+                    x: 0,
+                    y: 0,
                     height: HEIGHT,
                     width: 10,
                 },
                 Wall {
                     x: (WIDTH - 10) as i32,
-                    y: 0 as i32,
+                    y: 0,
                     height: HEIGHT,
                     width: 10,
                 },
                 Wall {
-                    x: 0 as i32,
-                    y: 0 as i32,
+                    x: 0,
+                    y: 0,
                     height: 10,
                     width: WIDTH,
                 },
                 Wall {
-                    x: 0 as i32,
+                    x: 0,
                     y: (HEIGHT - 10) as i32,
                     height: 10,
                     width: WIDTH,
                 },
             ],
-        };
-        gamestate
+        }
     }
 
     pub fn draw(&self, frame: &mut [u8]) {
@@ -154,10 +153,10 @@ impl GameState {
             collision = true;
         }
 
-        if balls >= paddle1 && (balle >= paddle1left && ballw <= paddle1right) {
-            self.ball.vx = -self.ball.vx;
-            collision = true;
-        }
+        // if balls >= paddle1 && (balle >= paddle1left && ballw <= paddle1right) {
+        //     self.ball.vx = -self.ball.vx;
+        //     collision = true;
+        // }
 
         // if balls >= paddle1 && (ballw == paddle1right) {
         //     self.ball.vx = -self.ball.vx;
