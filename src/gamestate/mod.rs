@@ -2,6 +2,8 @@ use super::object::ball::Ball;
 use super::object::paddle::Paddle;
 use super::object::wall::Wall;
 use super::{HEIGHT, WIDTH};
+use std::collections::HashSet;
+use winit::keyboard::KeyCode;
 
 #[derive(Default)]
 pub struct GameState {
@@ -9,6 +11,7 @@ pub struct GameState {
     pub ball: Ball,
     pub paddles: [Paddle; 2],
     pub walls: [Wall; 4],
+    pub input: HashSet<KeyCode>,
 }
 
 impl GameState {
@@ -62,6 +65,7 @@ impl GameState {
                     width: WIDTH,
                 },
             ],
+            input: HashSet::new(),
         }
     }
 
@@ -103,9 +107,25 @@ impl GameState {
     }
 
     pub fn update(&mut self) {
+        self.handle_input();
         self.ball.update();
 
         self.collision();
+    }
+
+    fn handle_input(&mut self) {
+        if self.input.contains(&KeyCode::KeyA) {
+            self.paddles[0].left_shift();
+        }
+        if self.input.contains(&KeyCode::KeyD) {
+            self.paddles[0].right_shift();
+        }
+        if self.input.contains(&KeyCode::ArrowLeft) {
+            self.paddles[1].left_shift();
+        }
+        if self.input.contains(&KeyCode::ArrowRight) {
+            self.paddles[1].right_shift();
+        }
     }
 
     // Temporary collision code. Have to implement a better collision checker for the future

@@ -3,15 +3,13 @@ use pixels::{Error, Pixels, SurfaceTexture};
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant};
-use winit::application::ApplicationHandler;
-use winit::event_loop::{ActiveEventLoop, ControlFlow};
-use winit::window::WindowId;
 use winit::{
+    application::ApplicationHandler,
     dpi::LogicalSize,
-    event::{Event, MouseButton, WindowEvent},
-    event_loop::EventLoop,
+    event::{Event, WindowEvent},
+    event_loop::{ActiveEventLoop, ControlFlow, EventLoop},
     keyboard::KeyCode,
-    window::Window,
+    window::{Window, WindowId},
 };
 
 pub mod gamestate;
@@ -27,7 +25,6 @@ struct App {
     window: Option<Arc<Window>>,
     pixels: Option<Pixels<'static>>,
     state: Arc<Mutex<GameState>>,
-    count: u32,
 }
 
 // This is the ApplicationHandler trait that is used by winit to update window and everything
@@ -70,7 +67,6 @@ impl ApplicationHandler for App {
         };
         self.pixels = Some(pixels);
 
-        // self.state.draw(self.pixels.as_mut().unwrap().frame_mut());
         self.state
             .lock()
             .unwrap()
@@ -80,14 +76,10 @@ impl ApplicationHandler for App {
     fn window_event(&mut self, event_loop: &ActiveEventLoop, id: WindowId, event: WindowEvent) {
         match event {
             WindowEvent::CloseRequested => {
-                println!(
-                    "The close button was pressed; stopping. Frames: {}",
-                    self.count
-                );
+                println!("The close button was pressed; stopping.");
                 event_loop.exit();
             }
             WindowEvent::RedrawRequested => {
-                // self.count += 1;
                 {
                     let gs = self.state.lock().unwrap();
                     gs.clear_screen(self.pixels.as_mut().unwrap().frame_mut());
@@ -97,58 +89,18 @@ impl ApplicationHandler for App {
                     dbg!(err);
                     return;
                 }
-                // Queue a RedrawRequested event.
-                //
-                // You only need to call this if you've determined that you need to redraw in
-                // applications which do not always need to. Applications that redraw continuously
-                // can render here instead.
+
                 self.window.as_ref().unwrap().request_redraw();
             }
             // TODO: Learn to use if let you dumass. The below code would be so much more simpler
             // then. Don't forget to change this later
             WindowEvent::KeyboardInput { event, .. } => {
-                match &event.physical_key {
-                    winit::keyboard::PhysicalKey::Code(key) => match key {
-                        KeyCode::KeyA => {
-                            self.state
-                                .lock()
-                                .unwrap()
-                                .paddles
-                                .get_mut(0)
-                                .unwrap()
-                                .left_shift();
-                        }
-                        KeyCode::KeyD => {
-                            self.state
-                                .lock()
-                                .unwrap()
-                                .paddles
-                                .get_mut(0)
-                                .unwrap()
-                                .right_shift();
-                        }
-                        KeyCode::ArrowLeft => {
-                            self.state
-                                .lock()
-                                .unwrap()
-                                .paddles
-                                .get_mut(1)
-                                .unwrap()
-                                .left_shift();
-                        }
-                        KeyCode::ArrowRight => {
-                            self.state
-                                .lock()
-                                .unwrap()
-                                .paddles
-                                .get_mut(1)
-                                .unwrap()
-                                .right_shift();
-                        }
-                        _ => {}
-                    },
-                    _ => {
-                        todo!();
+                if let winit::keyboard::PhysicalKey::Code(key) = event.physical_key {
+                    let mut gs = self.state.lock().unwrap();
+                    if event.state.is_pressed() {
+                        gs.input.insert(key);
+                    } else {
+                        gs.input.remove(&key);
                     }
                 }
                 self.window.as_ref().unwrap().request_redraw();
@@ -172,8 +124,9 @@ fn main() {
     };
 
     let state = Arc::clone(&app.state);
-    let tick = Duration::from_millis(16);
+    let tick = Duration::from_nanos(16_000_000);
     thread::spawn(move || {
+        thread::sleep(Duration::from_millis(1000));
         loop {
             let start = Instant::now();
             {

@@ -7,14 +7,15 @@ My first big project in Rust. Trying to maximize learning through this. (Feature
 - Game initialization
 - Paddle movement
 - Ball rendering and collisions
+- Separating game updates from rendering (separating game time)
+- Both paddle work at the same time
 
 ## Up next
 
-- Separating game updates from rendering (separating game time)
-- Both paddle work at the same time
-- Proper code format 😢
 - Acceleration for the paddle
 - Ball bouncing randomizing
+- Paddle wall collisions
+- Proper code format 😢
 
 ## Reading Materials
 
