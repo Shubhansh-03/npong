@@ -9,13 +9,14 @@ My first big project in Rust. Trying to maximize learning through this. (Feature
 - Ball rendering and collisions
 - Separating game updates from rendering (separating game time)
 - Both paddle work at the same time
+- Acceleration for the paddle
 
 ## Up next
 
-- Acceleration for the paddle
 - Ball bouncing randomizing
 - Paddle wall collisions
 - Proper code format 😢
+- Frame updates optimization (caching mechanism)
 
 ## Reading Materials
 

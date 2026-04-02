@@ -1,14 +1,13 @@
 use gamestate::GameState;
-use pixels::{Error, Pixels, SurfaceTexture};
+use pixels::{Pixels, SurfaceTexture};
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant};
 use winit::{
     application::ApplicationHandler,
     dpi::LogicalSize,
-    event::{Event, WindowEvent},
+    event::WindowEvent,
     event_loop::{ActiveEventLoop, ControlFlow, EventLoop},
-    keyboard::KeyCode,
     window::{Window, WindowId},
 };
 
@@ -73,7 +72,7 @@ impl ApplicationHandler for App {
             .draw(self.pixels.as_mut().unwrap().frame_mut());
     }
 
-    fn window_event(&mut self, event_loop: &ActiveEventLoop, id: WindowId, event: WindowEvent) {
+    fn window_event(&mut self, event_loop: &ActiveEventLoop, _id: WindowId, event: WindowEvent) {
         match event {
             WindowEvent::CloseRequested => {
                 println!("The close button was pressed; stopping.");
@@ -125,7 +124,7 @@ fn main() {
 
     let state = Arc::clone(&app.state);
     let tick = Duration::from_nanos(16_000_000);
-    thread::spawn(move || {
+    let _game_loop = thread::spawn(move || {
         thread::sleep(Duration::from_millis(1000));
         loop {
             let start = Instant::now();

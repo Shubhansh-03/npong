@@ -79,10 +79,10 @@ impl GameState {
         }
         self.ball.draw(frame);
 
-        self.walls.get(0).unwrap().draw(frame);
-        self.walls.get(1).unwrap().draw(frame);
-        self.walls.get(2).unwrap().draw(frame);
-        self.walls.get(3).unwrap().draw(frame);
+        self.walls[0].draw(frame);
+        self.walls[1].draw(frame);
+        self.walls[2].draw(frame);
+        self.walls[3].draw(frame);
     }
 
     // Wrote code to clear frame by myself. (Could not find the library method for it TT )
@@ -146,67 +146,117 @@ impl GameState {
     }
 
     // Temporary collision code. Have to implement a better collision checker for the future
-    // TODO: Fix the paddle collision bug also proper wall collisions
     pub fn collision(&mut self) {
         let mut collision = false;
-        let ballx = self.ball.x;
-        let bally = self.ball.y;
-        let ballradius = self.ball.radius as i32;
-        let balls = bally + ballradius;
-        let balln = bally - ballradius;
-        let balle = ballx + ballradius;
-        let ballw = ballx - ballradius;
+        let ball_x = self.ball.x;
+        let ball_y = self.ball.y;
+        let ball_radius = self.ball.radius as i32;
+        let ball_s = ball_y + ball_radius;
+        let ball_n = ball_y - ball_radius;
+        let ball_e = ball_x + ball_radius;
+        let ball_w = ball_x - ball_radius;
 
-        let paddle1 = self.paddles[0].y;
-        let paddle1left = self.paddles[0].x;
-        let paddle1right = self.paddles[0].x + self.paddles[0].width as i32;
-        let paddle2 = self.paddles.get(1).unwrap();
-        let paddle2 = paddle2.y + paddle2.height as i32;
-        let paddle2left = self.paddles.get(1).unwrap().x;
-        let paddle2right =
-            self.paddles.get(1).unwrap().x + self.paddles.get(1).unwrap().width as i32;
+        let paddle1_top = self.paddles[0].y;
+        let paddle1_bot = self.paddles[0].y + self.paddles[0].height as i32;
+        let paddle1_left = self.paddles[0].x;
+        let paddle1_right = self.paddles[0].x + self.paddles[0].width as i32;
 
-        // Boundary collisions
-        if balls >= (HEIGHT - 10) as i32 {
-            self.ball.vy = -self.ball.vy;
+        let paddle2_top = self.paddles[1].y;
+        let paddle2_bot = self.paddles[1].y + self.paddles[1].height as i32;
+        let paddle2_left = self.paddles[1].x;
+        let paddle2_right = self.paddles[1].x + self.paddles[1].width as i32;
+
+        if ball_s >= (HEIGHT - 10) as i32 {
+            self.ball.vy = -self.ball.vy.abs();
+            self.ball.y = (HEIGHT - 10) as i32 - ball_radius;
             collision = true;
         }
-        if (balln) <= 10 {
+        if ball_n <= 10 {
             self.ball.vy = -self.ball.vy;
+            self.ball.y = 10 + ball_radius;
             collision = true;
         }
-        if balle >= (WIDTH - 10) as i32 {
+        if ball_e >= (WIDTH - 10) as i32 {
             self.ball.vx = -self.ball.vx;
+            self.ball.x = (WIDTH - 10) as i32 - ball_radius;
             collision = true;
         }
-        if (ballw) <= 10 {
+        if ball_w <= 10 {
             self.ball.vx = -self.ball.vx;
+            self.ball.x = 10 + ball_radius;
             collision = true;
         }
 
-        if balls >= paddle1 && (ballx <= paddle1right && ballx >= paddle1left) {
-            self.ball.vy = -self.ball.vy;
+        let in_x_range_1 = ball_e >= paddle1_left && ball_w <= paddle1_right;
+        let in_y_range_1 = ball_s >= paddle1_top && ball_n <= paddle1_bot;
+
+        if in_x_range_1 && in_y_range_1 {
+            let overlap_top = ball_s - paddle1_top;
+            let overlap_left = ball_e - paddle1_left;
+            let overlap_right = paddle1_right - ball_w;
+
+            let min_overlap = overlap_top.min(overlap_left).min(overlap_right);
+
+            if min_overlap == overlap_top {
+                self.ball.vy = -self.ball.vy;
+                self.ball.y = paddle1_top - ball_radius;
+            } else if min_overlap == overlap_left {
+                self.ball.vx = -self.ball.vx;
+                self.ball.x = paddle1_left - ball_radius;
+            } else {
+                self.ball.vx = -self.ball.vx;
+                self.ball.x = paddle1_right + ball_radius;
+            }
             collision = true;
+        } else {
+            let corners = [(paddle1_left, paddle1_top), (paddle1_right, paddle1_top)];
+            for (cx, cy) in corners {
+                let dist_sq = (ball_x - cx).pow(2) + (ball_y - cy).pow(2);
+                if dist_sq <= ball_radius.pow(2) {
+                    let old_vx = self.ball.vx;
+                    let old_vy = self.ball.vy;
+                    self.ball.vx = -old_vy;
+                    self.ball.vy = -old_vx;
+                    collision = true;
+                    break;
+                }
+            }
         }
 
-        // if balls >= paddle1 && (balle >= paddle1left && ballw <= paddle1right) {
-        //     self.ball.vx = -self.ball.vx;
-        //     collision = true;
-        // }
+        let in_x_range_2 = ball_e >= paddle2_left && ball_w <= paddle2_right;
+        let in_y_range_2 = ball_s >= paddle2_top && ball_n <= paddle2_bot;
 
-        // if balls >= paddle1 && (ballw == paddle1right) {
-        //     self.ball.vx = -self.ball.vx;
-        //     collision = true;
-        // }
+        if in_x_range_2 && in_y_range_2 {
+            let overlap_bot = paddle2_bot - ball_n;
+            let overlap_left = ball_e - paddle2_left;
+            let overlap_right = paddle2_right - ball_w;
 
-        if balln <= paddle2 && (ballx <= paddle2right && ballx >= paddle2left) {
-            self.ball.vy = -self.ball.vy;
+            let min_overlap = overlap_bot.min(overlap_left).min(overlap_right);
+
+            if min_overlap == overlap_bot {
+                self.ball.vy = -self.ball.vy;
+                self.ball.y = paddle2_bot + ball_radius;
+            } else if min_overlap == overlap_left {
+                self.ball.vx = -self.ball.vx;
+                self.ball.x = paddle2_left - ball_radius;
+            } else {
+                self.ball.vx = -self.ball.vx;
+                self.ball.x = paddle2_right + ball_radius;
+            }
             collision = true;
-        }
-
-        if balls >= paddle1 && (balle >= paddle2left && ballw <= paddle2right) {
-            self.ball.vx = -self.ball.vx;
-            collision = true;
+        } else {
+            let corners = [(paddle2_left, paddle2_bot), (paddle2_right, paddle2_bot)];
+            for (cx, cy) in corners {
+                let dist_sq = (ball_x - cx).pow(2) + (ball_y - cy).pow(2);
+                if dist_sq <= ball_radius.pow(2) {
+                    let old_vx = self.ball.vx;
+                    let old_vy = self.ball.vy;
+                    self.ball.vx = -old_vy;
+                    self.ball.vy = -old_vx;
+                    collision = true;
+                    break;
+                }
+            }
         }
 
         if collision {
