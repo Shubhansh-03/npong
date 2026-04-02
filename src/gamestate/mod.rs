@@ -24,12 +24,16 @@ impl GameState {
                     y: (HEIGHT - HEIGHT / 30) as i32,
                     height: HEIGHT / 60,
                     width: WIDTH / 15,
+                    acceleration_left: 0.0,
+                    acceleration_right: 0.0,
                 },
                 Paddle {
                     x: ((WIDTH - WIDTH / 15) / 2) as i32,
                     y: (HEIGHT / 60) as i32,
                     height: HEIGHT / 60,
                     width: WIDTH / 15,
+                    acceleration_left: 0.0,
+                    acceleration_right: 0.0,
                 },
             ],
             ball: Ball {
@@ -114,17 +118,30 @@ impl GameState {
     }
 
     fn handle_input(&mut self) {
+        let mut paddle1_movement = false;
+        let mut paddle2_movement = false;
         if self.input.contains(&KeyCode::KeyA) {
             self.paddles[0].left_shift();
+            paddle1_movement = true;
         }
         if self.input.contains(&KeyCode::KeyD) {
             self.paddles[0].right_shift();
+            paddle1_movement = true;
         }
         if self.input.contains(&KeyCode::ArrowLeft) {
             self.paddles[1].left_shift();
+            paddle2_movement = true;
         }
         if self.input.contains(&KeyCode::ArrowRight) {
             self.paddles[1].right_shift();
+            paddle2_movement = true;
+        }
+
+        if !paddle1_movement {
+            self.paddles[0].acceleration_left = 0.0;
+        }
+        if !paddle2_movement {
+            self.paddles[1].acceleration_left = 0.0;
         }
     }
 
@@ -140,10 +157,9 @@ impl GameState {
         let balle = ballx + ballradius;
         let ballw = ballx - ballradius;
 
-        let paddle1 = self.paddles.get(0).unwrap().y;
-        let paddle1left = self.paddles.get(0).unwrap().x;
-        let paddle1right =
-            self.paddles.get(0).unwrap().x + self.paddles.get(0).unwrap().width as i32;
+        let paddle1 = self.paddles[0].y;
+        let paddle1left = self.paddles[0].x;
+        let paddle1right = self.paddles[0].x + self.paddles[0].width as i32;
         let paddle2 = self.paddles.get(1).unwrap();
         let paddle2 = paddle2.y + paddle2.height as i32;
         let paddle2left = self.paddles.get(1).unwrap().x;
