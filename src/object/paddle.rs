@@ -6,20 +6,39 @@ pub struct Paddle {
     pub y: i32,
     pub height: u32,
     pub width: u32,
-    pub acceleration_left: f32,
-    pub acceleration_right: f32,
+    pub acceleration: f32,
 }
 
 impl Paddle {
+    pub fn new(players: u8) -> Vec<Paddle> {
+        if players == 2 {
+            vec![
+                Paddle {
+                    x: ((WIDTH - WIDTH / 15) / 2) as i32,
+                    y: (HEIGHT - HEIGHT / 30) as i32,
+                    height: HEIGHT / 60,
+                    width: WIDTH / 15,
+                    acceleration: 0.0,
+                },
+                Paddle {
+                    x: ((WIDTH - WIDTH / 15) / 2) as i32,
+                    y: (HEIGHT / 60) as i32,
+                    height: HEIGHT / 60,
+                    width: WIDTH / 15,
+                    acceleration: 0.0,
+                },
+            ]
+        } else {
+            todo!();
+        }
+    }
     pub fn left_shift(&mut self) {
-        self.acceleration_right = 0.0;
-        self.x -= 3 + self.acceleration_left as i32;
-        self.acceleration_left += 0.1;
+        self.x -= 3 - self.acceleration as i32;
+        self.acceleration -= 0.1;
     }
     pub fn right_shift(&mut self) {
-        self.acceleration_left = 0.0;
-        self.x += 3 + self.acceleration_right as i32;
-        self.acceleration_right += 0.1;
+        self.x += 3 + self.acceleration as i32;
+        self.acceleration += 0.1;
     }
     pub fn draw(&self, frame: &mut [u8]) {
         let (x, y, h, w) = (self.x, self.y, self.height, self.width);

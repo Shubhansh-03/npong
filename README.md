@@ -22,3 +22,7 @@ My first big project in Rust. Trying to maximize learning through this. (Feature
 
 - Rust auto generated documentation
 - [Pixels GitHub Page](https://github.com/parasyte/pixels)
+
+### Bugs (potentially)
+
+- Paddle movement should also cause ball collision triggers
