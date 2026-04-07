@@ -19,15 +19,15 @@ impl GameLoop {
             let start = Instant::now();
             {
                 let mut gs = state.write().unwrap();
-                let delta = Instant::now().duration_since(self.last_update);
-                let delta = delta.as_millis();
-                println!("{}", delta);
-                {
-                    let input_read_lock = inputs.read().unwrap();
-                    gs.handle_input(&input_read_lock, delta);
-                }
+                let delta;
                 if let Status::Running = gs.status {
+                    {
+                        let input_read_lock = inputs.read().unwrap();
+                        delta = self.get_delta();
+                        gs.handle_input(&input_read_lock, delta);
+                    }
                     gs.update(delta);
+                    println!("{delta}");
                     self.last_update = Instant::now();
                 }
                 if let Status::Exit = gs.status {
@@ -42,5 +42,8 @@ impl GameLoop {
             }
         }
         println!("Updates: {}", updates);
+    }
+    pub fn get_delta(&self) -> u128 {
+        Instant::now().duration_since(self.last_update).as_millis()
     }
 }

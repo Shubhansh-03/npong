@@ -1,5 +1,6 @@
 use super::super::{HEIGHT, WIDTH};
 use crate::gamestate::GameState;
+use crate::object::paddle::*;
 
 pub struct CollisionSystem;
 
@@ -34,6 +35,10 @@ impl CollisionSystem {
             state.objects.ball.vx = -state.objects.ball.vx;
             state.objects.ball.x = 10 + ball_radius;
             collision = true;
+        }
+
+        for paddle in state.objects.paddles.iter_mut() {
+            CollisionSystem::paddle_wall_collion(paddle);
         }
 
         let paddle_data: Vec<(i32, i32, i32, i32, bool)> = state
@@ -104,6 +109,22 @@ impl CollisionSystem {
 
         if collision {
             state.objects.ball.update(delta);
+            let accn = state.objects.ball.acceleration;
+            state.objects.ball.vx = state.objects.ball.vx
+                + accn * (state.objects.ball.vx / (state.objects.ball.vx.abs()));
+            state.objects.ball.vy = state.objects.ball.vy
+                + accn * (state.objects.ball.vy / (state.objects.ball.vy.abs()));
+        }
+    }
+    pub fn paddle_wall_collion(paddle: &mut Paddle) {
+        let left = paddle.x;
+        let right = paddle.x + paddle.width as i32;
+
+        if left <= 10 {
+            paddle.x = 10;
+        }
+        if right >= (WIDTH - 10) as i32 {
+            paddle.x = (WIDTH - 10 - paddle.width) as i32;
         }
     }
 }

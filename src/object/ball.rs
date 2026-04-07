@@ -7,9 +7,20 @@ pub struct Ball {
     pub y: i32,
     pub vx: f32,
     pub vy: f32,
+    pub acceleration: f32,
 }
 
 impl Ball {
+    pub fn new() -> Self {
+        Ball {
+            radius: 15,
+            x: (WIDTH / 2) as i32,
+            y: (HEIGHT / 2) as i32,
+            vx: 0.4,
+            vy: 0.3,
+            acceleration: 0.01,
+        }
+    }
     pub fn draw(&self, frame: &mut [u8]) {
         let r = self.radius as i32;
         let r2 = r * r;

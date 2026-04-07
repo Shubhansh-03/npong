@@ -11,11 +11,12 @@ My first big project in Rust. Trying to maximize learning through this. (Feature
 - Both paddle work at the same time
 - Acceleration for the paddle
 - Game updates use Delta time
+- Paddle wall collisions
 
 ## Up next
 
 - Ball bouncing randomizing
-- Paddle wall collisions
+- Ball wall collisions reset game
 - Sound effects
 - Frame updates optimization (caching mechanism)
 - Custom png rendering pipeline

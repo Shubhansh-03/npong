@@ -26,13 +26,7 @@ impl GameState {
             players: 2,
             objects: Objects {
                 paddles: Paddle::new(2),
-                ball: Ball {
-                    radius: 15,
-                    x: (WIDTH / 2) as i32,
-                    y: (HEIGHT / 2) as i32,
-                    vx: 0.4,
-                    vy: 0.30,
-                },
+                ball: Ball::new(),
                 walls: [
                     Wall {
                         x: 0,
@@ -96,6 +90,9 @@ impl GameState {
                 self.objects.paddles[1].acceleration = 0.0;
             }
         }
+    }
+
+    pub fn check_paused(&mut self, input: &Input) {
         if input.toggled.contains(&KeyCode::Space) {
             self.status = Status::Paused;
         } else {
