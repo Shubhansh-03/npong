@@ -30,8 +30,8 @@ impl GameState {
                     radius: 15,
                     x: (WIDTH / 2) as i32,
                     y: (HEIGHT / 2) as i32,
-                    vx: 4.0,
-                    vy: 3.0,
+                    vx: 0.4,
+                    vy: 0.30,
                 },
                 walls: [
                     Wall {
@@ -63,29 +63,29 @@ impl GameState {
         }
     }
 
-    pub fn update(&mut self) {
-        self.objects.ball.update();
-        self.collision();
+    pub fn update(&mut self, delta: u128) {
+        self.objects.ball.update(delta);
+        self.collision(delta);
     }
 
-    pub fn handle_input(&mut self, input: &Input) {
+    pub fn handle_input(&mut self, input: &Input, delta: u128) {
         if let Status::Running = self.status {
             let mut paddle1_movement = false;
             let mut paddle2_movement = false;
             if input.pressed.contains(&KeyCode::KeyA) {
-                self.objects.paddles[0].left_shift();
+                self.objects.paddles[0].left_shift(delta);
                 paddle1_movement = true;
             }
             if input.pressed.contains(&KeyCode::KeyD) {
-                self.objects.paddles[0].right_shift();
+                self.objects.paddles[0].right_shift(delta);
                 paddle1_movement = true;
             }
             if input.pressed.contains(&KeyCode::ArrowLeft) {
-                self.objects.paddles[1].left_shift();
+                self.objects.paddles[1].left_shift(delta);
                 paddle2_movement = true;
             }
             if input.pressed.contains(&KeyCode::ArrowRight) {
-                self.objects.paddles[1].right_shift();
+                self.objects.paddles[1].right_shift(delta);
                 paddle2_movement = true;
             }
 
@@ -103,7 +103,7 @@ impl GameState {
         }
     }
 
-    pub fn collision(&mut self) {
-        CollisionSystem::collision(self);
+    pub fn collision(&mut self, delta: u128) {
+        CollisionSystem::collision(self, delta);
     }
 }

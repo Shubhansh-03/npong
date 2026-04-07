@@ -117,8 +117,9 @@ fn main() {
 
     let state = Arc::clone(&app.state);
     let inputs = Arc::clone(&app.inputs);
-    let gameloop = GameLoop {
+    let mut gameloop = GameLoop {
         ticks: Duration::from_millis(16),
+        last_update: Instant::now(),
     };
     let _game_loop = thread::spawn(move || gameloop.game_loop(state, inputs));
 
@@ -126,4 +127,3 @@ fn main() {
     let _x = event_loop.run_app(&mut app);
     println!("Time elapsed: {}", time.elapsed().as_secs_f32());
 }
-

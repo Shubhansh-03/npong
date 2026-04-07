@@ -5,7 +5,7 @@ pub struct CollisionSystem;
 
 impl CollisionSystem {
     // TODO: Make this human, I know I can. (Abhi bhi bug h thodu sa)
-    pub fn collision(state: &mut GameState) {
+    pub fn collision(state: &mut GameState, delta: u128) {
         let mut collision = false;
         let ball_x = state.objects.ball.x;
         let ball_y = state.objects.ball.y;
@@ -103,7 +103,7 @@ impl CollisionSystem {
         }
 
         if collision {
-            state.objects.ball.update();
+            state.objects.ball.update(delta);
         }
     }
 }

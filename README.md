@@ -10,13 +10,15 @@ My first big project in Rust. Trying to maximize learning through this. (Feature
 - Separating game updates from rendering (separating game time)
 - Both paddle work at the same time
 - Acceleration for the paddle
+- Game updates use Delta time
 
 ## Up next
 
 - Ball bouncing randomizing
 - Paddle wall collisions
-- Proper code format 😢
+- Sound effects
 - Frame updates optimization (caching mechanism)
+- Custom png rendering pipeline
 
 ## Reading Materials
 

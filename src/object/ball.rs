@@ -37,10 +37,10 @@ impl Ball {
         }
     }
 
-    pub fn update(&mut self) {
+    pub fn update(&mut self, delta: u128) {
         let (mut tx, mut ty) = (self.x, self.y);
-        tx += self.vx as i32;
-        ty += self.vy as i32;
+        tx += (self.vx * delta as f32).round() as i32;
+        ty += (self.vy * delta as f32).round() as i32;
 
         self.x = tx;
         self.y = ty;

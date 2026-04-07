@@ -32,13 +32,19 @@ impl Paddle {
             todo!();
         }
     }
-    pub fn left_shift(&mut self) {
-        self.x -= 3 - self.acceleration as i32;
-        self.acceleration -= 0.1;
+    pub fn left_shift(&mut self, delta: u128) {
+        if self.acceleration > 0.0 {
+            self.acceleration = 0.0;
+        }
+        self.x -= ((0.3 - self.acceleration) * delta as f32) as i32;
+        self.acceleration -= 0.01;
     }
-    pub fn right_shift(&mut self) {
-        self.x += 3 + self.acceleration as i32;
-        self.acceleration += 0.1;
+    pub fn right_shift(&mut self, delta: u128) {
+        if self.acceleration < 0.0 {
+            self.acceleration = 0.0;
+        }
+        self.x += ((0.3 + self.acceleration) * delta as f32) as i32;
+        self.acceleration += 0.01;
     }
     pub fn draw(&self, frame: &mut [u8]) {
         let (x, y, h, w) = (self.x, self.y, self.height, self.width);
