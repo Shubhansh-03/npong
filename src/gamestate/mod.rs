@@ -1,7 +1,7 @@
 use super::Input;
 use super::object::{Objects, ball::*, paddle::*, wall::*};
 use super::systems::collision::*;
-use super::{HEIGHT, WIDTH};
+// use super::{HEIGHT, WIDTH};
 use winit::keyboard::KeyCode;
 
 #[derive(Default)]
@@ -9,6 +9,7 @@ pub enum Status {
     #[default]
     Paused,
     Running,
+    Reset,
     Exit,
 }
 
@@ -27,32 +28,7 @@ impl GameState {
             objects: Objects {
                 paddles: Paddle::new(2),
                 ball: Ball::new(),
-                walls: [
-                    Wall {
-                        x: 0,
-                        y: 0,
-                        height: HEIGHT,
-                        width: 10,
-                    },
-                    Wall {
-                        x: (WIDTH - 10) as i32,
-                        y: 0,
-                        height: HEIGHT,
-                        width: 10,
-                    },
-                    Wall {
-                        x: 0,
-                        y: 0,
-                        height: 10,
-                        width: WIDTH,
-                    },
-                    Wall {
-                        x: 0,
-                        y: (HEIGHT - 10) as i32,
-                        height: 10,
-                        width: WIDTH,
-                    },
-                ],
+                walls: Wall::new(2),
             },
         }
     }
@@ -89,6 +65,12 @@ impl GameState {
             if !paddle2_movement {
                 self.objects.paddles[1].acceleration = 0.0;
             }
+
+            if input.toggled.contains(&KeyCode::Space) {
+                self.status = Status::Paused;
+            } else {
+                self.status = Status::Running;
+            }
         }
     }
 
@@ -98,6 +80,19 @@ impl GameState {
         } else {
             self.status = Status::Running;
         }
+    }
+
+    pub fn reset(&mut self) {
+        // players: 2,
+        // objects: Objects {
+        //     paddles: Paddle::new(2),
+        //     ball: Ball::new(),
+        //     walls: Wall::new(2),
+        // },
+        self.objects.paddles = Paddle::new(2);
+        self.objects.ball = Ball::new();
+        self.objects.walls = Wall::new(2);
+        self.status = Status::Reset;
     }
 
     pub fn collision(&mut self, delta: u128) {

@@ -121,7 +121,11 @@ fn main() {
         ticks: Duration::from_millis(16),
         last_update: Instant::now(),
     };
-    let _game_loop = thread::spawn(move || gameloop.game_loop(state, inputs));
+    let _game_loop = thread::spawn(move || {
+        thread::sleep(Duration::from_millis(500));
+        gameloop.last_update = Instant::now();
+        gameloop.game_loop(state, inputs)
+    });
 
     let time = Instant::now();
     let _x = event_loop.run_app(&mut app);

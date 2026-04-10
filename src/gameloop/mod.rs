@@ -13,26 +13,47 @@ pub struct GameLoop {
 
 impl GameLoop {
     pub fn game_loop(&mut self, state: Arc<RwLock<GameState>>, inputs: Arc<RwLock<Input>>) {
-        // let timer = Instant::now();
         let mut updates = 0;
+        let mut reset = false;
         'gameloop: loop {
             let start = Instant::now();
-            {
+            'game_state_lock: {
                 let mut gs = state.write().unwrap();
                 let delta;
-                if let Status::Running = gs.status {
-                    {
-                        let input_read_lock = inputs.read().unwrap();
-                        delta = self.get_delta();
-                        gs.handle_input(&input_read_lock, delta);
+                match gs.status {
+                    Status::Running => {
+                        {
+                            let input_read_lock = inputs.read().unwrap();
+                            delta = self.get_delta();
+                            gs.handle_input(&input_read_lock, delta);
+                        }
+                        gs.update(delta);
+                        self.last_update = Instant::now();
                     }
-                    gs.update(delta);
-                    println!("{delta}");
-                    self.last_update = Instant::now();
-                }
-                if let Status::Exit = gs.status {
-                    break 'gameloop;
-                }
+                    Status::Paused => {
+                        {
+                            let input_read_lock = inputs.read().unwrap();
+                            delta = self.get_delta();
+                            gs.check_paused(&input_read_lock);
+                        }
+                        self.last_update = Instant::now();
+                    }
+                    Status::Reset => {
+                        reset = true;
+                        gs.status = Status::Running;
+                        break 'game_state_lock;
+                    }
+                    Status::Exit => {
+                        if let Status::Exit = gs.status {
+                            break 'gameloop;
+                        }
+                    }
+                };
+            }
+            if reset {
+                thread::sleep(Duration::from_millis(500));
+                reset = false;
+                self.last_update = Instant::now();
             }
 
             updates += 1;

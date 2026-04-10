@@ -1,3 +1,6 @@
+use std::thread;
+use std::time::Duration;
+
 use super::super::{HEIGHT, WIDTH};
 use crate::gamestate::GameState;
 use crate::object::paddle::*;
@@ -20,11 +23,13 @@ impl CollisionSystem {
             state.objects.ball.vy = -state.objects.ball.vy.abs();
             state.objects.ball.y = (HEIGHT - 10) as i32 - ball_radius;
             collision = true;
+            state.reset();
         }
         if ball_n <= 10 {
             state.objects.ball.vy = -state.objects.ball.vy;
             state.objects.ball.y = 10 + ball_radius;
             collision = true;
+            state.reset();
         }
         if ball_e >= (WIDTH - 10) as i32 {
             state.objects.ball.vx = -state.objects.ball.vx;

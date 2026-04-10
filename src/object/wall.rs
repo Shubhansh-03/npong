@@ -6,6 +6,7 @@ pub struct Wall {
     pub y: i32,
     pub height: u32,
     pub width: u32,
+    pub critical: bool,
 }
 
 impl Wall {
@@ -23,6 +24,42 @@ impl Wall {
 
                 frame[idx..idx + 4].copy_from_slice(&[200, 235, 255, 255]);
             }
+        }
+    }
+    pub fn new(players: u8) -> [Wall; 4] {
+        if players == 2 {
+            [
+                Wall {
+                    x: 0,
+                    y: (HEIGHT - 10) as i32,
+                    height: 10,
+                    width: WIDTH,
+                    critical: true,
+                },
+                Wall {
+                    x: (WIDTH - 10) as i32,
+                    y: 0,
+                    height: HEIGHT,
+                    width: 10,
+                    critical: false,
+                },
+                Wall {
+                    x: 0,
+                    y: 0,
+                    height: 10,
+                    width: WIDTH,
+                    critical: true,
+                },
+                Wall {
+                    x: 0,
+                    y: 0,
+                    height: HEIGHT,
+                    width: 10,
+                    critical: false,
+                },
+            ]
+        } else {
+            todo!()
         }
     }
 }
