@@ -12,6 +12,7 @@ My first big project in Rust. Trying to maximize learning through this. (Feature
 - Acceleration for the paddle
 - Game updates use Delta time
 - Ball wall collisions reset game
+- Randomizing ball starting state
 
 ## Up next
 
@@ -19,6 +20,7 @@ My first big project in Rust. Trying to maximize learning through this. (Feature
 - Sound effects
 - Frame updates optimization (caching mechanism)
 - Custom png rendering pipeline
+- Intensive testing
 
 ## Reading Materials
 

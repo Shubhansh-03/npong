@@ -12,12 +12,15 @@ pub struct Ball {
 
 impl Ball {
     pub fn new() -> Self {
+        let vx: f32 = rand::random_range(-0.5..=0.5);
+        let p = rand::random_bool(0.5);
+        let vy: f32 = (0.25 - vx * vx).sqrt() * { if p { 1.0 } else { -1.0 } };
         Ball {
             radius: 15,
             x: (WIDTH / 2) as i32,
             y: (HEIGHT / 2) as i32,
-            vx: 0.4,
-            vy: 0.3,
+            vx,
+            vy,
             acceleration: 0.01,
         }
     }
@@ -39,9 +42,9 @@ impl Ball {
                 let idx = ((py as u32 * WIDTH + px as u32) * 4) as usize;
                 // frame[idx..idx + 4].copy_from_slice(&[255, 0, 255, 255]);
                 frame[idx..idx + 4].copy_from_slice(&[
-                    0,
-                    ((idx) % 100 + 100) as u8,
-                    ((idx) % 100 + 100) as u8,
+                    (((dx + dy) * 2) % 255 + 10) as u8,
+                    ((dx * 2) % 255 + 20) as u8,
+                    ((dy * 3) % 255 + 150) as u8,
                     255,
                 ]);
             }
