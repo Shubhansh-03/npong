@@ -1,6 +1,3 @@
-use std::thread;
-use std::time::Duration;
-
 use super::super::{HEIGHT, WIDTH};
 use crate::gamestate::GameState;
 use crate::object::paddle::*;

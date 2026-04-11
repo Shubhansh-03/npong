@@ -33,7 +33,6 @@ impl GameLoop {
                     Status::Paused => {
                         {
                             let input_read_lock = inputs.read().unwrap();
-                            delta = self.get_delta();
                             gs.check_paused(&input_read_lock);
                         }
                         self.last_update = Instant::now();
