@@ -10,7 +10,7 @@ use winit::{
     dpi::LogicalSize,
     event::WindowEvent,
     event_loop::{ActiveEventLoop, ControlFlow, EventLoop},
-    window::{Window, WindowId},
+    window::{Fullscreen, Window, WindowId},
 };
 
 pub mod gameloop;
@@ -20,15 +20,19 @@ pub mod systems;
 
 const WIDTH: u32 = 1200;
 const HEIGHT: u32 = 900;
-
 // Using Arc for Window because references to Window is going to used for everything (was facing an
 // issue with lifetimes so had to look into Smart Pointers)
 #[derive(Default)]
 struct App {
+    // Stores the window and its required functions
     window: Option<Arc<Window>>,
+    // Stores the pixel buffer and the frame
     pixels: Option<Pixels<'static>>,
+    // The current state of the game
     state: Arc<RwLock<GameState>>,
+    // Stores the inputs of the game
     inputs: Arc<RwLock<Input>>,
+    frames: u32,
 }
 
 // This is the ApplicationHandler trait that is used by winit to update window and everything
@@ -45,7 +49,8 @@ impl ApplicationHandler for App {
                         Window::default_attributes()
                             .with_title("NPONG")
                             .with_inner_size(scaled_size)
-                            .with_min_inner_size(size),
+                            .with_min_inner_size(size)
+                            .with_fullscreen(Some(Fullscreen::Borderless(None))),
                     )
                     .unwrap(),
             )
@@ -85,6 +90,7 @@ impl ApplicationHandler for App {
                 event_loop.exit();
             }
             WindowEvent::RedrawRequested => {
+                self.frames += 1;
                 Render::draw(Arc::clone(&self.state), self.pixels.as_mut().unwrap());
                 self.window.as_ref().unwrap().request_redraw();
             }
@@ -129,5 +135,6 @@ fn main() {
 
     let time = Instant::now();
     let _x = event_loop.run_app(&mut app);
+    println!("Frames: {}", app.frames);
     println!("Time elapsed: {}", time.elapsed().as_secs_f32());
 }
