@@ -1,5 +1,7 @@
+use crate::clientstate::ClientState;
+
 use super::Input;
-use super::gamestate::*;
+use shared::gamestate::*;
 use std::{
     sync::{Arc, RwLock},
     thread,
@@ -12,7 +14,7 @@ pub struct GameLoop {
 }
 
 impl GameLoop {
-    pub fn game_loop(&mut self, state: Arc<RwLock<GameState>>, inputs: Arc<RwLock<Input>>) {
+    pub fn game_loop(&mut self, state: Arc<RwLock<ClientState>>, inputs: Arc<RwLock<Input>>) {
         let mut updates = 0;
         let mut reset = false;
         'gameloop: loop {
@@ -20,31 +22,30 @@ impl GameLoop {
             'game_state_lock: {
                 let mut gs = state.write().unwrap();
                 let delta;
-                match gs.status {
+                match gs.game.status {
                     Status::Running => {
                         {
                             let input_read_lock = inputs.read().unwrap();
                             delta = self.get_delta();
-                            gs.handle_input(&input_read_lock, delta);
+                            gs.game.handle_input(&input_read_lock, delta);
                         }
-                        gs.update(delta);
+                        gs.game.update(delta);
                         self.last_update = Instant::now();
                     }
                     Status::Paused => {
                         {
                             let input_read_lock = inputs.read().unwrap();
-                            delta = self.get_delta();
-                            gs.check_paused(&input_read_lock);
+                            gs.game.check_paused(&input_read_lock);
                         }
                         self.last_update = Instant::now();
                     }
                     Status::Reset => {
                         reset = true;
-                        gs.status = Status::Running;
+                        gs.game.status = Status::Running;
                         break 'game_state_lock;
                     }
                     Status::Exit => {
-                        if let Status::Exit = gs.status {
+                        if let Status::Exit = gs.game.status {
                             break 'gameloop;
                         }
                     }

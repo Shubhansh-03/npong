@@ -1,9 +1,10 @@
 use pixels::Pixels;
-
-use super::super::gamestate::*;
-use super::super::{HEIGHT, WIDTH};
+use shared::gamestate::*;
+use shared::{HEIGHT, WIDTH};
 use std::sync::Arc;
 use std::sync::RwLock;
+
+use crate::clientstate::ClientState;
 
 pub struct Render {}
 
@@ -31,21 +32,21 @@ impl Render {
         }
     }
 
-    pub fn draw_objects(state: &GameState, frame: &mut [u8]) {
+    pub fn draw_objects(state: &GameState, player: u8, frame: &mut [u8]) {
         for paddle in state.objects.paddles.iter() {
-            paddle.draw(frame);
+            paddle.draw(player, frame);
         }
-        state.objects.ball.draw(frame);
+        state.objects.ball.draw(player, frame);
         for wall in state.objects.walls.iter() {
-            wall.draw(frame);
+            wall.draw(frame, player);
         }
     }
 
-    pub fn draw(state: Arc<RwLock<GameState>>, pixels: &mut Pixels<'static>) {
+    pub fn draw(state: Arc<RwLock<ClientState>>, pixels: &mut Pixels<'static>) {
         {
             let gs = state.read().unwrap();
             Self::clear_screen(pixels.frame_mut());
-            Self::draw_objects(&gs, pixels.frame_mut());
+            Self::draw_objects(&gs.game, gs.player_id, pixels.frame_mut());
         }
         if let Err(err) = pixels.render() {
             dbg!(err);

@@ -1,6 +1,3 @@
-use std::thread;
-use std::time::Duration;
-
 use super::super::{HEIGHT, WIDTH};
 use crate::gamestate::GameState;
 use crate::object::paddle::*;
@@ -42,20 +39,22 @@ impl CollisionSystem {
             collision = true;
         }
 
-        for paddle in state.objects.paddles.iter_mut() {
-            CollisionSystem::paddle_wall_collion(paddle);
+        for paddle in state.objects.paddles.iter_mut().enumerate() {
+            CollisionSystem::paddle_wall_collion(paddle.1, paddle.0 as u8);
         }
 
         let paddle_data: Vec<(i32, i32, i32, i32, bool)> = state
             .objects
             .paddles
             .iter()
-            .map(|p| {
-                let top = p.y;
-                let bot = p.y + p.height as i32;
-                let left = p.x;
-                let right = p.x + p.width as i32;
-                let is_bottom = p.y > (HEIGHT / 2) as i32;
+            .enumerate()
+            .map(|(idx, p)| {
+                let (x, y) = p.global_coordinates(idx as u8 + 1);
+                let top = y + (p.height / 2) as i32;
+                let bot = y - (p.height / 2) as i32;
+                let left = x - (p.width / 2) as i32;
+                let right = x + (p.width / 2) as i32;
+                let is_bottom = y > (HEIGHT / 2) as i32;
                 (top, bot, left, right, is_bottom)
             })
             .collect();
@@ -121,15 +120,17 @@ impl CollisionSystem {
                 + accn * (state.objects.ball.vy / (state.objects.ball.vy.abs()));
         }
     }
-    pub fn paddle_wall_collion(paddle: &mut Paddle) {
-        let left = paddle.x;
-        let right = paddle.x + paddle.width as i32;
+
+    pub fn paddle_wall_collion(paddle: &mut Paddle, id: u8) {
+        let (x, _y) = paddle.global_coordinates(id);
+        let left = x - (paddle.width / 2) as i32;
+        let right = x + (paddle.width / 2) as i32;
 
         if left <= 10 {
-            paddle.x = 10;
+            paddle.shift = -((WIDTH / 2) as i32) + 10 + (paddle.width / 2) as i32;
         }
         if right >= (WIDTH - 10) as i32 {
-            paddle.x = (WIDTH - 10 - paddle.width) as i32;
+            paddle.shift = ((WIDTH / 2) as i32) - 10 - (paddle.width / 2) as i32;
         }
     }
 }

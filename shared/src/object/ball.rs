@@ -12,9 +12,11 @@ pub struct Ball {
 
 impl Ball {
     pub fn new() -> Self {
-        let vx: f32 = rand::random_range(-0.5..=0.5);
-        let p = rand::random_bool(0.5);
-        let vy: f32 = (0.25 - vx * vx).sqrt() * { if p { 1.0 } else { -1.0 } };
+        // let vx: f32 = rand::random_range(-0.5..=0.5);
+        // let p = rand::random_bool(0.5);
+        // let vy: f32 = (0.25 - vx * vx).sqrt() * { if p { 1.0 } else { -1.0 } };
+        let vx = 0.0;
+        let vy = 0.0;
         Ball {
             radius: 15,
             x: (WIDTH / 2) as i32,
@@ -24,7 +26,21 @@ impl Ball {
             acceleration: 0.01,
         }
     }
-    pub fn draw(&self, frame: &mut [u8]) {
+    pub fn draw(&self, player: u8, frame: &mut [u8]) {
+        let x = {
+            if player == 1 {
+                self.x
+            } else {
+                WIDTH as i32 - self.x
+            }
+        };
+        let y = {
+            if player == 1 {
+                self.y
+            } else {
+                HEIGHT as i32 - self.y
+            }
+        };
         let r = self.radius as i32;
         let r2 = r * r;
 
@@ -33,8 +49,8 @@ impl Ball {
                 if dy * dy + dx * dx > r2 {
                     continue;
                 }
-                let px = self.x + dx;
-                let py = self.y + dy;
+                let px = x + dx;
+                let py = y + dy;
                 if px < 0 || py < 0 || px >= WIDTH as i32 || py >= HEIGHT as i32 {
                     continue;
                 }

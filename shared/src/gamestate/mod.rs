@@ -1,7 +1,5 @@
-use super::Input;
 use super::object::{Objects, ball::*, paddle::*, wall::*};
-use super::systems::collision::*;
-// use super::{HEIGHT, WIDTH};
+use crate::systems::{collision::*, input::*};
 use winit::keyboard::KeyCode;
 
 #[derive(Default)]
@@ -83,12 +81,6 @@ impl GameState {
     }
 
     pub fn reset(&mut self) {
-        // players: 2,
-        // objects: Objects {
-        //     paddles: Paddle::new(2),
-        //     ball: Ball::new(),
-        //     walls: Wall::new(2),
-        // },
         self.objects.paddles = Paddle::new(2);
         self.objects.ball = Ball::new();
         self.objects.walls = Wall::new(2);

@@ -1,0 +1,15 @@
+[package]
+name = "client"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+winit = "*"
+pixels = "*"
+rand = "*"
+actix-rt = "*"
+awc = "*"
+futures-util = "*"
+serde = "*"
+
+shared = { path = "../shared" }

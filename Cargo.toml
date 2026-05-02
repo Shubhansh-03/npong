@@ -1,9 +1,3 @@
-[package]
-name = "npong"
-version = "0.1.0"
-edition = "2024"
-
-[dependencies]
-winit = "*"
-pixels = "*"
-rand = "*"
+[workspace]
+members = ["server", "client", "shared"]
+resolver = "3"
