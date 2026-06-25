@@ -10,7 +10,7 @@ pub struct Wall {
 }
 
 impl Wall {
-    pub fn draw(&self, frame: &mut [u8], _player: u8) {
+    pub fn draw(&self, frame: &mut [u8]) {
         let (x, y, h, w) = (self.x, self.y, self.height, self.width);
         for dy in 0..h {
             for dx in 0..w {

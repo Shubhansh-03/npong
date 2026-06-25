@@ -1,41 +1,42 @@
-use awc::Client;
-use futures_util::{SinkExt, StreamExt};
-
-use gameloop::*;
-use pixels::{Pixels, SurfaceTexture};
-use shared::{gamestate::*, systems::input::*};
 use std::sync::{Arc, RwLock};
-use std::thread;
 use std::time::{Duration, Instant};
-use systems::render::*;
-use winit::{
-    application::ApplicationHandler,
-    dpi::LogicalSize,
-    event::WindowEvent,
-    event_loop::{ActiveEventLoop, ControlFlow, EventLoop},
-    window::{Window, WindowId},
-};
 
-use crate::clientstate::ClientState;
+use pixels::{Pixels, SurfaceTexture};
+use winit::application::ApplicationHandler;
+use winit::dpi::LogicalSize;
+use winit::event::WindowEvent;
+use winit::event_loop::{ActiveEventLoop, ControlFlow, EventLoop};
+use winit::window::{Window, WindowId};
 
-pub mod clientstate;
-pub mod gameloop;
-pub mod systems;
+use crate::gameloop::Gameloop;
+use crate::net::NetHandle;
+use crate::state::gamestate::{GameState, Status};
+use crate::systems::render::Render;
+
+mod coordinates;
+mod gameloop;
+mod net;
+mod object;
+mod state;
+mod systems;
+use systems::input;
 
 const WIDTH: u32 = 1200;
 const HEIGHT: u32 = 900;
 
-// Using Arc for Window because references to Window is going to used for everything (was facing an
-// issue with lifetimes so had to look into Smart Pointers)
 #[derive(Default)]
 struct App {
+    // Stores the window and its required functions
     window: Option<Arc<Window>>,
+    // Stores the pixel buffer and the frame
     pixels: Option<Pixels<'static>>,
-    state: Arc<RwLock<ClientState>>,
-    inputs: Arc<RwLock<Input>>,
+    // The current state of the game
+    state: Arc<RwLock<GameState>>,
+    // Stores the inputs of the game
+    inputs: Arc<RwLock<input::Input>>,
+    frames: u32,
 }
 
-// This is the ApplicationHandler trait that is used by winit to update window and everything
 impl ApplicationHandler for App {
     // Acc to my understanding (not very good yet) this function runs only once when window is
     // being created for the first time for my use case. (Can run multiple times)
@@ -49,7 +50,8 @@ impl ApplicationHandler for App {
                         Window::default_attributes()
                             .with_title("NPONG")
                             .with_inner_size(scaled_size)
-                            .with_min_inner_size(size),
+                            .with_min_inner_size(size)
+                            .with_fullscreen(Some(winit::window::Fullscreen::Borderless(None))),
                     )
                     .unwrap(),
             )
@@ -75,7 +77,7 @@ impl ApplicationHandler for App {
         };
         self.pixels = Some(pixels);
 
-        self.state.write().unwrap().game.status = Status::Running;
+        self.state.write().unwrap().status = Status::Running;
     }
 
     fn window_event(&mut self, event_loop: &ActiveEventLoop, _id: WindowId, event: WindowEvent) {
@@ -83,12 +85,13 @@ impl ApplicationHandler for App {
             WindowEvent::CloseRequested => {
                 {
                     let mut gs = self.state.write().unwrap();
-                    gs.game.status = Status::Exit;
+                    gs.status = Status::Exit;
                 }
                 println!("The close button was pressed; stopping.");
                 event_loop.exit();
             }
             WindowEvent::RedrawRequested => {
+                self.frames += 1;
                 Render::draw(Arc::clone(&self.state), self.pixels.as_mut().unwrap());
                 self.window.as_ref().unwrap().request_redraw();
             }
@@ -101,110 +104,49 @@ impl ApplicationHandler for App {
             }
             _ => (),
         }
+        {
+            // let gs = self.state.read().unwrap();
+            // match gs.status {}
+        }
     }
-}
-
-pub async fn init_net() -> Result<u8, Box<dyn std::error::Error>> {
-    let cl = Client::default();
-    let (_res, mut ws) = cl
-        .ws("ws://127.0.0.1:8080/ws")
-        .connect()
-        .await
-        .map_err(|e| format!("Failed to connect: {}", e))?;
-
-    if let Some(Ok(awc::ws::Frame::Text(txt))) = ws.next().await {
-        let id: u8 = std::str::from_utf8(&txt)?.parse()?;
-
-        actix_rt::spawn(async move {
-            while let Some(Ok(m)) = ws.next().await {
-                println!("rx: {:?}", m);
-            }
-        });
-
-        return Ok(id);
-    }
-
-    Err("Server connection failed".into())
 }
 
 #[actix_rt::main]
-async fn main() -> std::io::Result<()> {
-    match init_net().await {
-        Ok(assigned_id) => {
-            println!("Joined room as Player {}", assigned_id);
-            // 2. Start winit only after connection is successful
-            run(assigned_id);
+async fn main() {
+    match net::NetHandle::initialize().await {
+        Ok(handle) => {
+            run(handle);
         }
-        Err(e) => {
-            eprintln!("Could not start game: {}", e);
-            std::process::exit(1);
-        }
+        Err(err) => println!("{}", err),
     }
-
-    Ok(())
 }
 
-fn run(player_id: u8) {
+fn run(handle: NetHandle) {
     let event_loop = EventLoop::new().unwrap();
+
+    // ControlFlow::Poll continuously runs the event loop, even if the OS hasn't
+    // dispatched any events. This is ideal for games and similar applications.
     event_loop.set_control_flow(ControlFlow::Poll);
 
-    // Initialize state with the ID we got from the server
-    let initial_state = ClientState {
-        player_id,
-        ..Default::default()
-    };
-
-    let state = Arc::new(RwLock::new(initial_state));
-    let inputs = Arc::new(RwLock::new(Input::default()));
-
+    let state = Arc::new(RwLock::new(GameState::new(1)));
     let mut app = App {
-        state: Arc::clone(&state),
-        inputs: Arc::clone(&inputs),
+        state,
         ..Default::default()
     };
 
-    // Start GameLoop thread
-    let loop_state = Arc::clone(&state);
-    let loop_inputs = Arc::clone(&inputs);
-    thread::spawn(move || {
-        let mut gameloop = GameLoop {
-            ticks: Duration::from_millis(16),
-            last_update: Instant::now(),
-        };
-        gameloop.game_loop(loop_state, loop_inputs)
-    });
+    let inputs = Arc::clone(&app.inputs);
+    let mut gameloop = Gameloop {
+        ticks: Duration::from_millis(16),
+        last_update: Instant::now(),
+    };
+    // let _game_loop = thread::spawn(move || {
+    //     thread::sleep(Duration::from_millis(500));
+    //     gameloop.last_update = Instant::now();
+    //     gameloop.game_loop(state, inputs, handle);
+    // });
 
-    event_loop.run_app(&mut app).unwrap();
+    let time = Instant::now();
+    let _x = event_loop.run_app(&mut app);
+    println!("Frames: {}", app.frames);
+    println!("Time elapsed: {}", time.elapsed().as_secs_f32());
 }
-
-// fn run() {
-//     let event_loop = EventLoop::new().unwrap();
-//
-//     // ControlFlow::Poll continuously runs the event loop, even if the OS hasn't
-//     // dispatched any events. This is ideal for games and similar applications.
-//     event_loop.set_control_flow(ControlFlow::Poll);
-//
-//     let state = Arc::new(RwLock::new(ClientState::default()));
-//     let inputs = Arc::new(RwLock::new(Input::default()));
-//     let mut app = App {
-//         state,
-//         inputs,
-//         ..Default::default()
-//     };
-//
-//     let state = Arc::clone(&app.state);
-//     let inputs = Arc::clone(&app.inputs);
-//     let mut gameloop = GameLoop {
-//         ticks: Duration::from_millis(16),
-//         last_update: Instant::now(),
-//     };
-//     let _game_loop = thread::spawn(move || {
-//         thread::sleep(Duration::from_millis(500));
-//         gameloop.last_update = Instant::now();
-//         gameloop.game_loop(state, inputs)
-//     });
-//
-//     let time = Instant::now();
-//     let _x = event_loop.run_app(&mut app);
-//     println!("Time elapsed: {}", time.elapsed().as_secs_f32());
-// }

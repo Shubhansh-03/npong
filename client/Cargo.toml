@@ -8,8 +8,9 @@ winit = "*"
 pixels = "*"
 rand = "*"
 actix-rt = "*"
+actix-codec = "*"
 awc = "*"
 futures-util = "*"
+bytes = "*"
+tokio = { version = "1", features = ["time"] }
 serde = "*"
-
-shared = { path = "../shared" }

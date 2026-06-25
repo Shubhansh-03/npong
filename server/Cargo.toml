@@ -8,5 +8,4 @@ actix-web = "4"
 actix-ws = "*"
 actix-rt = "*"
 futures-util = "*"
-
-shared = { path = "../shared" }
+tokio = { version = "1", features = ["full"] }
