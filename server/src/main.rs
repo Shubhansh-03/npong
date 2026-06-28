@@ -18,15 +18,17 @@ async fn websocket_handler(
 ) -> Result<HttpResponse, Error> {
     let mut p1 = data.player1.lock().await;
     if p1.is_none() {
-        let (res, session, mut _msg_stream) = actix_ws::handle(&req, stream)?;
+        let (res, mut session, mut _msg_stream) = actix_ws::handle(&req, stream)?;
         println!("P1 Connected");
+        session.text("1").await.unwrap();
         *p1 = Some(session);
         Ok(res)
     } else {
         let mut p2 = data.player2.lock().await;
         if p2.is_none() {
-            let (res, session, mut _msg_stream) = actix_ws::handle(&req, stream)?;
+            let (res, mut session, mut _msg_stream) = actix_ws::handle(&req, stream)?;
             println!("P2 Connected");
+            session.text("2").await.unwrap();
             *p2 = Some(session);
             Ok(res)
         } else {

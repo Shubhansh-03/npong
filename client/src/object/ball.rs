@@ -25,7 +25,7 @@ impl Ball {
         }
     }
 
-    pub fn draw(&self, frame: &mut [u8]) {
+    pub fn draw(&self, frame: &mut [u8], viewer_id: u8) {
         let r = self.radius as i32;
         let r2 = r * r;
 
@@ -45,10 +45,16 @@ impl Ball {
                     continue;
                 }
 
+                let (rx, ry) = if viewer_id == 2 {
+                    (WIDTH as i32 - 1 - px, HEIGHT as i32 - 1 - py)
+                } else {
+                    (px, py)
+                };
+
                 // Calculate normalized distance from center (0.0 to 1.0)
                 let dist = (d2 as f32).sqrt() / r as f32;
 
-                let idx = ((py as u32 * WIDTH + px as u32) * 4) as usize;
+                let idx = ((ry as u32 * WIDTH + rx as u32) * 4) as usize;
 
                 // Pattern: Bright center that fades to a neon edge with a "zebra" ring
                 let c1 = (255.0 * (1.0 - dist)) as u8; // White core

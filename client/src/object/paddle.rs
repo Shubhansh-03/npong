@@ -1,9 +1,8 @@
-use crate::{HEIGHT, WIDTH};
+use crate::{HEIGHT, WIDTH, coordinates::Coordinate};
 
 #[derive(Default)]
 pub struct Paddle {
-    pub x: i32,
-    pub y: i32,
+    pub position: Coordinate,
     pub height: u32,
     pub width: u32,
     pub acceleration: f32,
@@ -14,15 +13,19 @@ impl Paddle {
         if players == 2 {
             vec![
                 Paddle {
-                    x: ((WIDTH - WIDTH / 15) / 2) as i32,
-                    y: (HEIGHT - HEIGHT / 30) as i32,
+                    position: Coordinate::from_cartesian(
+                        ((WIDTH - WIDTH / 15) / 2) as u16,
+                        (HEIGHT - HEIGHT / 30) as u16,
+                    ),
                     height: HEIGHT / 60,
                     width: WIDTH / 15,
                     acceleration: 0.0,
                 },
                 Paddle {
-                    x: ((WIDTH - WIDTH / 15) / 2) as i32,
-                    y: (HEIGHT / 60) as i32,
+                    position: Coordinate::from_cartesian(
+                        ((WIDTH - WIDTH / 15) / 2) as u16,
+                        (HEIGHT / 60) as u16,
+                    ),
                     height: HEIGHT / 60,
                     width: WIDTH / 15,
                     acceleration: 0.0,
@@ -36,29 +39,44 @@ impl Paddle {
         if self.acceleration > 0.0 {
             self.acceleration = 0.0;
         }
-        self.x -= ((0.3 - self.acceleration) * delta as f32) as i32;
+        let (x, y) = self.position.get_cartesian();
+        let shift = ((0.3 - self.acceleration) * delta as f32) as i32;
+        let new_x = (x as i32 - shift).max(0) as u16;
+        self.position = Coordinate::from_cartesian(new_x, y);
         self.acceleration -= 0.01;
     }
     pub fn right_shift(&mut self, delta: u128) {
         if self.acceleration < 0.0 {
             self.acceleration = 0.0;
         }
-        self.x += ((0.3 + self.acceleration) * delta as f32) as i32;
+        let (x, y) = self.position.get_cartesian();
+        let shift = ((0.3 + self.acceleration) * delta as f32) as i32;
+        let max_x = (WIDTH as i32 - self.width as i32).max(0);
+        let new_x = (x as i32 + shift).max(0).min(max_x) as u16;
+        self.position = Coordinate::from_cartesian(new_x, y);
         self.acceleration += 0.01;
     }
-    pub fn draw(&self, frame: &mut [u8]) {
-        let (x, y, h, w) = (self.x, self.y, self.height, self.width);
+    pub fn draw(&self, frame: &mut [u8], viewer_id: u8, color: [u8; 4]) {
+        let (x, y) = self.position.get_cartesian();
+        let (h, w) = (self.height, self.width);
         for dy in 0..h {
             for dx in 0..w {
-                let px = x + dx as i32;
-                let py = y + dy as i32;
+                let px = x as i32 + dx as i32;
+                let py = y as i32 + dy as i32;
 
                 if px < 0 || py < 0 || px >= WIDTH as i32 || py >= HEIGHT as i32 {
                     continue;
                 }
-                let idx = ((py as u32 * WIDTH + px as u32) * 4) as usize;
+                
+                let (rx, ry) = if viewer_id == 2 {
+                    (WIDTH as i32 - 1 - px, HEIGHT as i32 - 1 - py)
+                } else {
+                    (px, py)
+                };
+                
+                let idx = ((ry as u32 * WIDTH + rx as u32) * 4) as usize;
 
-                frame[idx..idx + 4].copy_from_slice(&[255, 255, 255, 255]);
+                frame[idx..idx + 4].copy_from_slice(&color);
             }
         }
     }

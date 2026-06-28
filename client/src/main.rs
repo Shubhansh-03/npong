@@ -114,21 +114,21 @@ impl ApplicationHandler for App {
 #[actix_rt::main]
 async fn main() {
     match net::NetHandle::initialize().await {
-        Ok(handle) => {
-            run(handle);
+        Ok((handle, player_id)) => {
+            run(handle, player_id);
         }
         Err(err) => println!("{}", err),
     }
 }
 
-fn run(handle: NetHandle) {
+fn run(handle: NetHandle, player_id: u8) {
     let event_loop = EventLoop::new().unwrap();
 
     // ControlFlow::Poll continuously runs the event loop, even if the OS hasn't
     // dispatched any events. This is ideal for games and similar applications.
     event_loop.set_control_flow(ControlFlow::Poll);
 
-    let state = Arc::new(RwLock::new(GameState::new(1)));
+    let state = Arc::new(RwLock::new(GameState::new(player_id)));
     let mut app = App {
         state,
         ..Default::default()

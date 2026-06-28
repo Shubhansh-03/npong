@@ -1,8 +1,11 @@
 use std::sync::Arc;
 
 use actix_codec::Framed;
-use awc::{BoxedSocket, Client, ws::Codec};
-use futures_util::lock::Mutex;
+use awc::{
+    BoxedSocket, Client,
+    ws::{Codec, Frame},
+};
+use futures_util::{StreamExt, lock::Mutex};
 
 pub struct NetHandle {
     ws_connection: Framed<BoxedSocket, Codec>,
@@ -10,19 +13,31 @@ pub struct NetHandle {
 }
 
 impl NetHandle {
-    pub async fn initialize() -> Result<NetHandle, String> {
+    pub async fn initialize() -> Result<(NetHandle, u8), String> {
         let client = Client::default();
-        let (res, mut ws) = client
+        let (_res, mut ws) = client
             .ws("ws://127.0.0.1:8080/ws")
             .connect()
             .await
             .map_err(|e| format!("WebSocket connect failed: {}", e))?;
 
-        println!("Connected to the server.");
-        Ok(NetHandle {
-            ws_connection: ws,
-            message: "".into(),
-        })
+        let mut player_id = 1;
+        if let Some(Ok(Frame::Text(raw))) = ws.next().await {
+            if let Ok(text) = std::str::from_utf8(&raw) {
+                if let Ok(id) = text.parse::<u8>() {
+                    player_id = id;
+                }
+            }
+        }
+
+        println!("Connected to the server. Player ID: {}", player_id);
+        Ok((
+            NetHandle {
+                ws_connection: ws,
+                message: "".into(),
+            },
+            player_id,
+        ))
     }
 }
 

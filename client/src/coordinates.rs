@@ -6,10 +6,17 @@ pub struct Coordinate {
 
 impl Coordinate {
     pub fn from_cartesian(x: u16, y: u16) -> Coordinate {
-        Coordinate {
-            rad: ((x as u32 * x as u32) + (y as u32 * y as u32)).isqrt() as u16,
-            theta: (y as f32 / x as f32).atan(),
-        }
+        let rad = ((x as u32 * x as u32) + (y as u32 * y as u32)).isqrt() as u16;
+        let theta = if x == 0 {
+            if y == 0 {
+                0.0
+            } else {
+                std::f32::consts::FRAC_PI_2
+            }
+        } else {
+            (y as f32 / x as f32).atan()
+        };
+        Coordinate { rad, theta }
     }
     pub fn get_cartesian(self) -> (u16, u16) {
         let x = ((self.rad as f32) * self.theta.cos()) as u16;
