@@ -37,25 +37,25 @@ impl Wall {
         if players == 2 {
             [
                 Wall {
-                    position: Coordinate::from_cartesian(0, (HEIGHT - 10) as u16),
+                    position: Coordinate::from_cartesian(0.0, (HEIGHT - 10) as f32),
                     height: 10,
                     width: WIDTH,
                     critical: true,
                 },
                 Wall {
-                    position: Coordinate::from_cartesian((WIDTH - 10) as u16, 0),
+                    position: Coordinate::from_cartesian((WIDTH - 10) as f32, 0.0),
                     height: HEIGHT,
                     width: 10,
                     critical: false,
                 },
                 Wall {
-                    position: Coordinate::from_cartesian(0, 0),
+                    position: Coordinate::from_cartesian(0.0, 0.0),
                     height: 10,
                     width: WIDTH,
                     critical: true,
                 },
                 Wall {
-                    position: Coordinate::from_cartesian(0, 0),
+                    position: Coordinate::from_cartesian(0.0, 0.0),
                     height: HEIGHT,
                     width: 10,
                     critical: false,

@@ -14,8 +14,8 @@ impl Paddle {
             vec![
                 Paddle {
                     position: Coordinate::from_cartesian(
-                        ((WIDTH - WIDTH / 15) / 2) as u16,
-                        (HEIGHT - HEIGHT / 30) as u16,
+                        ((WIDTH - WIDTH / 15) / 2) as f32,
+                        (HEIGHT - HEIGHT / 30) as f32,
                     ),
                     height: HEIGHT / 60,
                     width: WIDTH / 15,
@@ -23,8 +23,8 @@ impl Paddle {
                 },
                 Paddle {
                     position: Coordinate::from_cartesian(
-                        ((WIDTH - WIDTH / 15) / 2) as u16,
-                        (HEIGHT / 60) as u16,
+                        ((WIDTH - WIDTH / 15) / 2) as f32,
+                        (HEIGHT / 60) as f32,
                     ),
                     height: HEIGHT / 60,
                     width: WIDTH / 15,
@@ -40,8 +40,8 @@ impl Paddle {
             self.acceleration = 0.0;
         }
         let (x, y) = self.position.get_cartesian();
-        let shift = ((0.3 - self.acceleration) * delta as f32) as i32;
-        let new_x = (x as i32 - shift).max(0) as u16;
+        let shift = (0.3 - self.acceleration) * delta as f32;
+        let new_x = (x - shift).max(0.0);
         self.position = Coordinate::from_cartesian(new_x, y);
         self.acceleration -= 0.01;
     }
@@ -50,9 +50,9 @@ impl Paddle {
             self.acceleration = 0.0;
         }
         let (x, y) = self.position.get_cartesian();
-        let shift = ((0.3 + self.acceleration) * delta as f32) as i32;
-        let max_x = (WIDTH as i32 - self.width as i32).max(0);
-        let new_x = (x as i32 + shift).max(0).min(max_x) as u16;
+        let shift = (0.3 + self.acceleration) * delta as f32;
+        let max_x = (WIDTH as i32 - self.width as i32).max(0) as f32;
+        let new_x = (x + shift).max(0.0).min(max_x);
         self.position = Coordinate::from_cartesian(new_x, y);
         self.acceleration += 0.01;
     }
@@ -67,13 +67,13 @@ impl Paddle {
                 if px < 0 || py < 0 || px >= WIDTH as i32 || py >= HEIGHT as i32 {
                     continue;
                 }
-                
+
                 let (rx, ry) = if viewer_id == 2 {
                     (WIDTH as i32 - 1 - px, HEIGHT as i32 - 1 - py)
                 } else {
                     (px, py)
                 };
-                
+
                 let idx = ((ry as u32 * WIDTH + rx as u32) * 4) as usize;
 
                 frame[idx..idx + 4].copy_from_slice(&color);

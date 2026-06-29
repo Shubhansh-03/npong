@@ -1,30 +1,29 @@
-#[derive(Default, Clone, Copy)]
+#[derive(Default, Clone, Copy, Debug)]
 pub struct Coordinate {
-    rad: u16,
-    theta: f32,
+    x: f32,
+    y: f32,
 }
 
 impl Coordinate {
-    pub fn from_cartesian(x: u16, y: u16) -> Coordinate {
-        let rad = ((x as u32 * x as u32) + (y as u32 * y as u32)).isqrt() as u16;
-        let theta = if x == 0 {
-            if y == 0 {
+    pub fn from_cartesian(x: f32, y: f32) -> Coordinate {
+        Coordinate { x, y }
+    }
+    
+    pub fn get_cartesian(self) -> (f32, f32) {
+        (self.x, self.y)
+    }
+
+    pub fn get_polar(self) -> (f32, f32) {
+        let rad = (self.x * self.x + self.y * self.y).sqrt();
+        let theta = if self.x == 0.0 {
+            if self.y == 0.0 {
                 0.0
             } else {
                 std::f32::consts::FRAC_PI_2
             }
         } else {
-            (y as f32 / x as f32).atan()
+            (self.y / self.x).atan()
         };
-        Coordinate { rad, theta }
-    }
-    pub fn get_cartesian(self) -> (u16, u16) {
-        let x = ((self.rad as f32) * self.theta.cos()) as u16;
-        let y = ((self.rad as f32) * self.theta.sin()) as u16;
-        (x, y)
-    }
-
-    pub fn get_polar(self) -> (u16, f32) {
-        (self.rad, self.theta)
+        (rad, theta)
     }
 }

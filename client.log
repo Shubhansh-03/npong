@@ -1,0 +1,88 @@
+   Compiling client v0.1.0 (/home/nigam/Projects/npong-multiplayer/client)
+warning: unused variable: `delta`
+  --> client/src/state/gamestate.rs:34:30
+   |
+34 |     pub fn update(&mut self, delta: u128) {
+   |                              ^^^^^ help: if this is intentional, prefix it with an underscore: `_delta`
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `delta`
+  --> client/src/state/gamestate.rs:82:33
+   |
+82 |     pub fn collision(&mut self, delta: u128) {
+   |                                 ^^^^^ help: if this is intentional, prefix it with an underscore: `_delta`
+
+warning: method `get_polar` is never used
+  --> client/src/coordinates.rs:16:12
+   |
+ 7 | impl Coordinate {
+   | --------------- method in this implementation
+...
+16 |     pub fn get_polar(self) -> (f32, f32) {
+   |            ^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: fields `vx`, `vy`, and `acceleration` are never read
+ --> client/src/object/ball.rs:7:9
+  |
+4 | pub struct Ball {
+  |            ---- fields in this struct
+...
+7 |     pub vx: f32,
+  |         ^^
+8 |     pub vy: f32,
+  |         ^^
+9 |     pub acceleration: f32,
+  |         ^^^^^^^^^^^^
+
+warning: method `update` is never used
+  --> client/src/object/ball.rs:74:12
+   |
+12 | impl Ball {
+   | --------- method in this implementation
+...
+74 |     pub fn update(&mut self, delta: u128) {
+   |            ^^^^^^
+
+warning: field `critical` is never read
+ --> client/src/object/wall.rs:8:9
+  |
+4 | pub struct Wall {
+  |            ---- field in this struct
+...
+8 |     pub critical: bool,
+  |         ^^^^^^^^
+
+warning: variant `Reset` is never constructed
+  --> client/src/state/gamestate.rs:10:5
+   |
+ 6 | pub enum Status {
+   |          ------ variant in this enum
+...
+10 |     Reset,
+   |     ^^^^^
+
+warning: methods `update`, `check_paused`, `reset`, and `collision` are never used
+  --> client/src/state/gamestate.rs:34:12
+   |
+21 | impl GameState {
+   | -------------- methods in this implementation
+...
+34 |     pub fn update(&mut self, delta: u128) {
+   |            ^^^^^^
+...
+66 |     pub fn check_paused(&mut self, input: &crate::systems::input::Input) {
+   |            ^^^^^^^^^^^^
+...
+75 |     pub fn reset(&mut self) {
+   |            ^^^^^
+...
+82 |     pub fn collision(&mut self, delta: u128) {
+   |            ^^^^^^^^^
+
+warning: `client` (bin "client") generated 8 warnings (run `cargo fix --bin "client" -p client` to apply 2 suggestions)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.53s
+     Running `target/debug/client`
+Connected to the server. Player ID: 1

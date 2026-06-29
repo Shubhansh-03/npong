@@ -31,56 +31,46 @@ impl GameState {
         }
     }
 
-    // pub fn update(&mut self, delta: u128) {
-    //     self.objects.ball.update(delta);
-    //     self.collision(delta);
-    // }
+    pub fn update(&mut self, delta: u128) {
+        // self.objects.ball.update(delta);
+        // self.collision(delta);
+    }
 
-    // pub fn handle_input(&mut self, input: &Input, delta: u128) {
-    //     if let Status::Running = self.status {
-    //         let mut paddle1_movement = false;
-    //         let mut paddle2_movement = false;
-    //         if input.pressed.contains(&KeyCode::KeyA) {
-    //             self.objects.paddles[0].left_shift(delta);
-    //             paddle1_movement = true;
-    //         }
-    //         if input.pressed.contains(&KeyCode::KeyD) {
-    //             self.objects.paddles[0].right_shift(delta);
-    //             paddle1_movement = true;
-    //         }
-    //         if input.pressed.contains(&KeyCode::ArrowLeft) {
-    //             self.objects.paddles[1].left_shift(delta);
-    //             paddle2_movement = true;
-    //         }
-    //         if input.pressed.contains(&KeyCode::ArrowRight) {
-    //             self.objects.paddles[1].right_shift(delta);
-    //             paddle2_movement = true;
-    //         }
-    //
-    //         if !paddle1_movement {
-    //             self.objects.paddles[0].acceleration = 0.0;
-    //         }
-    //         if !paddle2_movement {
-    //             self.objects.paddles[1].acceleration = 0.0;
-    //         }
-    //
-    //         if input.toggled.contains(&KeyCode::Space) {
-    //             self.status = Status::Paused;
-    //         } else {
-    //             self.status = Status::Running;
-    //         }
-    //     }
-    // }
-    //
-    // // Function to handle inputs even when game is paused
-    // pub fn check_paused(&mut self, input: &Input) {
-    //     if input.toggled.contains(&KeyCode::Space) {
-    //         self.status = Status::Paused;
-    //     } else {
-    //         // FIXME: Instead of Running it should be what the state was before setting it to Paused
-    //         self.status = Status::Running;
-    //     }
-    // }
+    pub fn handle_input(&mut self, input: &crate::systems::input::Input, delta: u128) {
+        if let Status::Running = self.status {
+            let mut local_movement = false;
+            let local_idx = (self.player_id - 1) as usize;
+
+            if input.pressed.contains(&KeyCode::KeyA) || input.pressed.contains(&KeyCode::ArrowLeft) {
+                self.objects.paddles[local_idx].left_shift(delta);
+                local_movement = true;
+            }
+            if input.pressed.contains(&KeyCode::KeyD) || input.pressed.contains(&KeyCode::ArrowRight) {
+                self.objects.paddles[local_idx].right_shift(delta);
+                local_movement = true;
+            }
+
+            if !local_movement {
+                self.objects.paddles[local_idx].acceleration = 0.0;
+            }
+
+            if input.toggled.contains(&KeyCode::Space) {
+                self.status = Status::Paused;
+            } else {
+                self.status = Status::Running;
+            }
+        }
+    }
+
+    // Function to handle inputs even when game is paused
+    pub fn check_paused(&mut self, input: &crate::systems::input::Input) {
+        if input.toggled.contains(&KeyCode::Space) {
+            self.status = Status::Paused;
+        } else {
+            // FIXME: Instead of Running it should be what the state was before setting it to Paused
+            self.status = Status::Running;
+        }
+    }
 
     pub fn reset(&mut self) {
         self.objects.paddles = Paddle::new(2);

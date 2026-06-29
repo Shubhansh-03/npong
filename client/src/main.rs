@@ -111,9 +111,27 @@ impl ApplicationHandler for App {
     }
 }
 
-#[actix_rt::main]
-async fn main() {
-    match net::NetHandle::initialize().await {
+fn main() {
+    let (tx, rx) = std::sync::mpsc::channel();
+    
+    std::thread::spawn(move || {
+        let sys = actix_rt::System::new();
+        
+        sys.block_on(async move {
+            match net::connect().await {
+                Ok((handle, player_id)) => {
+                    tx.send(Ok((handle, player_id))).unwrap();
+                }
+                Err(err) => {
+                    tx.send(Err(err)).unwrap();
+                }
+            }
+        });
+        
+        sys.run().unwrap();
+    });
+
+    match rx.recv().unwrap() {
         Ok((handle, player_id)) => {
             run(handle, player_id);
         }
@@ -130,20 +148,22 @@ fn run(handle: NetHandle, player_id: u8) {
 
     let state = Arc::new(RwLock::new(GameState::new(player_id)));
     let mut app = App {
-        state,
+        state: Arc::clone(&state),
         ..Default::default()
     };
 
-    let inputs = Arc::clone(&app.inputs);
+    let gl_state = Arc::clone(&app.state);
+    let gl_inputs = Arc::clone(&app.inputs);
     let mut gameloop = Gameloop {
         ticks: Duration::from_millis(16),
         last_update: Instant::now(),
     };
-    // let _game_loop = thread::spawn(move || {
-    //     thread::sleep(Duration::from_millis(500));
-    //     gameloop.last_update = Instant::now();
-    //     gameloop.game_loop(state, inputs, handle);
-    // });
+    
+    let _game_loop = std::thread::spawn(move || {
+        std::thread::sleep(Duration::from_millis(500));
+        gameloop.last_update = Instant::now();
+        gameloop.game_loop(gl_state, gl_inputs, handle);
+    });
 
     let time = Instant::now();
     let _x = event_loop.run_app(&mut app);

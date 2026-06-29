@@ -15,7 +15,7 @@ impl Ball {
         let p = rand::random_bool(0.5);
         let vy: f32 = (0.25 - vx * vx).sqrt() * { if p { 1.0 } else { -1.0 } };
 
-        let position = Coordinate::from_cartesian((WIDTH / 2) as u16, (HEIGHT / 2) as u16);
+        let position = Coordinate::from_cartesian((WIDTH / 2) as f32, (HEIGHT / 2) as f32);
         Ball {
             radius: 10,
             position,
@@ -73,8 +73,8 @@ impl Ball {
 
     pub fn update(&mut self, delta: u128) {
         let (mut tx, mut ty) = self.position.get_cartesian();
-        tx += (self.vx * delta as f32).round() as u16;
-        ty += (self.vy * delta as f32).round() as u16;
+        tx += self.vx * delta as f32;
+        ty += self.vy * delta as f32;
 
         self.position = Coordinate::from_cartesian(tx, ty);
     }
