@@ -3,7 +3,8 @@ use std::{
     time::{Duration, Instant},
 };
 
-use crate::{net::NetHandle, state::gamestate::{GameState, Status}, systems::input::Input};
+use crate::{net::NetHandle, systems::input::Input};
+use shared::state::gamestate::{GameState, Status};
 
 pub struct Gameloop {
     pub ticks: Duration,
@@ -30,7 +31,7 @@ impl Gameloop {
                     break;
                 }
 
-                gs.handle_input(&inputs_lock, delta);
+                gs.handle_input(&inputs_lock.to_game_input(), delta);
                 
                 // If the game is running, handle network sync
                 if let Status::Running = gs.status {
@@ -45,7 +46,9 @@ impl Gameloop {
                         let remote_x = if gs.player_id == 1 { server_msg.p2_x } else { server_msg.p1_x };
                         
                         let (_, y) = gs.objects.paddles[remote_paddle_idx].position.get_cartesian();
-                        gs.objects.paddles[remote_paddle_idx].position = crate::coordinates::Coordinate::from_cartesian(remote_x, y);
+                        gs.objects.paddles[remote_paddle_idx].position = shared::coordinates::Coordinate::from_cartesian(remote_x, y);
+                        
+                        gs.objects.ball.position = shared::coordinates::Coordinate::from_cartesian(server_msg.ball_x, server_msg.ball_y);
                     }
                 }
                 

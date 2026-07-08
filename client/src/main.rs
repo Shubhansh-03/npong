@@ -10,19 +10,13 @@ use winit::window::{Window, WindowId};
 
 use crate::gameloop::Gameloop;
 use crate::net::NetHandle;
-use crate::state::gamestate::{GameState, Status};
+use shared::state::gamestate::{GameState, Status};
 use crate::systems::render::Render;
 
-mod coordinates;
 mod gameloop;
 mod net;
-mod object;
-mod state;
 mod systems;
 use systems::input;
-
-const WIDTH: u32 = 1200;
-const HEIGHT: u32 = 900;
 
 #[derive(Default)]
 struct App {
@@ -43,7 +37,7 @@ impl ApplicationHandler for App {
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
         let window = {
             let size = LogicalSize::new(400.0, 300.0);
-            let scaled_size = LogicalSize::new(WIDTH as f64 * 3.0, HEIGHT as f64 * 3.0);
+            let scaled_size = LogicalSize::new(shared::WIDTH as f64 * 3.0, shared::HEIGHT as f64 * 3.0);
             Arc::new(
                 event_loop
                     .create_window(
@@ -66,7 +60,7 @@ impl ApplicationHandler for App {
                 window_size.height,
                 Arc::clone(self.window.as_ref().unwrap()),
             );
-            let mut p = Pixels::new(WIDTH, HEIGHT, surface_texture).expect("Pixel creation failed");
+            let mut p = Pixels::new(shared::WIDTH, shared::HEIGHT, surface_texture).expect("Pixel creation failed");
             p.clear_color(pixels::wgpu::Color {
                 r: 0.018,
                 g: 0.0,

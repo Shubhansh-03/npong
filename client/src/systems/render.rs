@@ -1,7 +1,7 @@
 use pixels::Pixels;
 
-use super::super::{HEIGHT, WIDTH};
-use crate::state::gamestate::*;
+use shared::{HEIGHT, WIDTH};
+use shared::state::gamestate::*;
 use std::sync::Arc;
 use std::sync::RwLock;
 
@@ -9,7 +9,7 @@ pub struct Render {}
 
 impl Render {
     pub fn clear_screen(frame: &mut [u8], viewer_id: u8) {
-        let (x, y, h, w) = (0, 0, crate::HEIGHT, crate::WIDTH);
+        let (x, y, h, w) = (0, 0, shared::HEIGHT, shared::WIDTH);
         for dy in 0..h {
             for dx in 0..w {
                 let px = x + dx as i32;

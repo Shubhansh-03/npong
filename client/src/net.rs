@@ -19,6 +19,8 @@ pub struct ClientMsg {
 pub struct ServerMsg {
     pub p1_x: f32,
     pub p2_x: f32,
+    pub ball_x: f32,
+    pub ball_y: f32,
 }
 
 #[derive(Clone)]

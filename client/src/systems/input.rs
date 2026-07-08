@@ -22,4 +22,12 @@ impl Input {
             self.pressed.remove(key);
         }
     }
+
+    pub fn to_game_input(&self) -> shared::input::GameInput {
+        shared::input::GameInput {
+            left_pressed: self.pressed.contains(&KeyCode::KeyA) || self.pressed.contains(&KeyCode::ArrowLeft),
+            right_pressed: self.pressed.contains(&KeyCode::KeyD) || self.pressed.contains(&KeyCode::ArrowRight),
+            pause_toggled: self.toggled.contains(&KeyCode::Space),
+        }
+    }
 }
