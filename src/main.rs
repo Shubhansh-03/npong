@@ -138,3 +138,4 @@ fn main() {
     println!("Frames: {}", app.frames);
     println!("Time elapsed: {}", time.elapsed().as_secs_f32());
 }
+

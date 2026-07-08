@@ -78,6 +78,7 @@ impl GameState {
         if input.toggled.contains(&KeyCode::Space) {
             self.status = Status::Paused;
         } else {
+            // FIXME: Instead of Running it should be what the state was before setting it to Paused
             self.status = Status::Running;
         }
     }

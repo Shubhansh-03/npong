@@ -2,17 +2,30 @@
 
 My first big project in Rust. Trying to maximize learning through this. (Features minimal use of AI and maximal dying inside)
 
+![game](data/ingame-screenshot.png)
+
 ## Features (Currently)
 
 - Game initialization
 - Paddle movement
 - Ball rendering and collisions
-- Separating game updates from rendering (separating game time)
+- Multithreaded game updates (rendering and updates handled separately)
 - Both paddle work at the same time
 - Acceleration for the paddle
 - Game updates use Delta time
 - Ball wall collisions reset game
 - Randomizing ball starting state
+- Real-time multiplayer
+
+## Architecture (Will update with more)
+![architecture](data/game-architecture.png)
+
+### Features (Multiplayer)
+
+- Real-time multiplayer support
+- WebSocket-based networking
+- Multiplayer room/lobby management
+- Server-authoritative game state synchronization
 
 ## Up next
 
