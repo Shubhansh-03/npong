@@ -1,3 +1,5 @@
 /target
 /.idea
 ToDoList.txt
+*.log
+*.py

@@ -41,13 +41,33 @@ impl GameState {
             let mut local_movement = false;
             let local_idx = (self.player_id - 1) as usize;
 
-            if input.pressed.contains(&KeyCode::KeyA) || input.pressed.contains(&KeyCode::ArrowLeft) {
-                self.objects.paddles[local_idx].left_shift(delta);
-                local_movement = true;
-            }
-            if input.pressed.contains(&KeyCode::KeyD) || input.pressed.contains(&KeyCode::ArrowRight) {
-                self.objects.paddles[local_idx].right_shift(delta);
-                local_movement = true;
+            // Invert movement according to which paddle it is
+            if local_idx == 0 {
+                if input.pressed.contains(&KeyCode::KeyA)
+                    || input.pressed.contains(&KeyCode::ArrowLeft)
+                {
+                    self.objects.paddles[local_idx].left_shift(delta);
+                    local_movement = true;
+                }
+                if input.pressed.contains(&KeyCode::KeyD)
+                    || input.pressed.contains(&KeyCode::ArrowRight)
+                {
+                    self.objects.paddles[local_idx].right_shift(delta);
+                    local_movement = true;
+                }
+            } else {
+                if input.pressed.contains(&KeyCode::KeyA)
+                    || input.pressed.contains(&KeyCode::ArrowLeft)
+                {
+                    self.objects.paddles[local_idx].right_shift(delta);
+                    local_movement = true;
+                }
+                if input.pressed.contains(&KeyCode::KeyD)
+                    || input.pressed.contains(&KeyCode::ArrowRight)
+                {
+                    self.objects.paddles[local_idx].left_shift(delta);
+                    local_movement = true;
+                }
             }
 
             if !local_movement {
