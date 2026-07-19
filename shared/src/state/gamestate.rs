@@ -80,7 +80,7 @@ impl GameState {
         if input.pause_toggled {
             self.status = Status::Paused;
         } else {
-            // FIXME: Instead of Running it should be what the state was before setting it to Paused
+            // FIXME: Instead of Running it should be what the state was before setting it to Paused (I don't thing I'm ever fixing this but in case I do in the future I deserve a sweet treat for that)
             self.status = Status::Running;
         }
     }

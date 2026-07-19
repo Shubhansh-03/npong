@@ -110,14 +110,14 @@ async fn websocket_handler(
 
     actix_rt::spawn(async move {
         while let Some(Ok(msg)) = msg_stream.next().await {
-            if let Message::Text(text) = msg {
-                if let Ok(client_msg) = serde_json::from_str::<ClientMsg>(&text) {
-                    let mut gs = state.lock().await;
-                    let p_idx = if is_player1 { 0 } else { 1 };
-                    let (_, y) = gs.objects.paddles[p_idx].position.get_cartesian();
-                    gs.objects.paddles[p_idx].position =
-                        Coordinate::from_cartesian(client_msg.paddle_x, y);
-                }
+            if let Message::Text(text) = msg
+                && let Ok(client_msg) = serde_json::from_str::<ClientMsg>(&text)
+            {
+                let mut gs = state.lock().await;
+                let p_idx = if is_player1 { 0 } else { 1 };
+                let (_, y) = gs.objects.paddles[p_idx].position.get_cartesian();
+                gs.objects.paddles[p_idx].position =
+                    Coordinate::from_cartesian(client_msg.paddle_x, y);
             }
         }
         println!("P{} Disconnected", player_num);
