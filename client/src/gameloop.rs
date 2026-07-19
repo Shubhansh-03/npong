@@ -26,13 +26,12 @@ impl Gameloop {
 
                 let mut gs = state.write().unwrap();
                 let inputs_lock = inputs.read().unwrap();
-                
+
+                gs.handle_input(&inputs_lock.to_game_input(), delta);
+
                 if let Status::Exit = gs.status {
                     break;
                 }
-
-                gs.handle_input(&inputs_lock.to_game_input(), delta);
-                
                 // If the game is running, handle network sync
                 if let Status::Running = gs.status {
                     // Send local paddle x to server

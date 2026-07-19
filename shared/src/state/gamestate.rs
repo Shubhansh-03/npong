@@ -72,6 +72,10 @@ impl GameState {
             } else {
                 self.status = Status::Running;
             }
+
+            if input.quit_game {
+                self.status = Status::Exit;
+            }
         }
     }
 
@@ -105,26 +109,34 @@ impl GameState {
 
         if ball_s >= (crate::HEIGHT - 10) as i32 {
             self.objects.ball.vy = -self.objects.ball.vy.abs();
-            self.objects.ball.position = crate::coordinates::Coordinate::from_cartesian(ball_x_f, ((crate::HEIGHT - 10) as i32 - ball_radius) as f32);
+            self.objects.ball.position = crate::coordinates::Coordinate::from_cartesian(
+                ball_x_f,
+                ((crate::HEIGHT - 10) as i32 - ball_radius) as f32,
+            );
             collision = true;
             // self.reset();
             // return;
         }
         if ball_n <= 10 {
             self.objects.ball.vy = -self.objects.ball.vy;
-            self.objects.ball.position = crate::coordinates::Coordinate::from_cartesian(ball_x_f, (10 + ball_radius) as f32);
+            self.objects.ball.position =
+                crate::coordinates::Coordinate::from_cartesian(ball_x_f, (10 + ball_radius) as f32);
             collision = true;
             // self.reset();
             // return;
         }
         if ball_e >= (crate::WIDTH - 10) as i32 {
             self.objects.ball.vx = -self.objects.ball.vx;
-            self.objects.ball.position = crate::coordinates::Coordinate::from_cartesian(((crate::WIDTH - 10) as i32 - ball_radius) as f32, ball_y_f);
+            self.objects.ball.position = crate::coordinates::Coordinate::from_cartesian(
+                ((crate::WIDTH - 10) as i32 - ball_radius) as f32,
+                ball_y_f,
+            );
             collision = true;
         }
         if ball_w <= 10 {
             self.objects.ball.vx = -self.objects.ball.vx;
-            self.objects.ball.position = crate::coordinates::Coordinate::from_cartesian((10 + ball_radius) as f32, ball_y_f);
+            self.objects.ball.position =
+                crate::coordinates::Coordinate::from_cartesian((10 + ball_radius) as f32, ball_y_f);
             collision = true;
         }
 
@@ -190,7 +202,8 @@ impl GameState {
                     self.objects.ball.vx = -self.objects.ball.vx;
                     curr_x = (paddle_right + ball_radius) as f32;
                 }
-                self.objects.ball.position = crate::coordinates::Coordinate::from_cartesian(curr_x, curr_y);
+                self.objects.ball.position =
+                    crate::coordinates::Coordinate::from_cartesian(curr_x, curr_y);
                 collision = true;
             } else {
                 let corners = if *is_bottom {

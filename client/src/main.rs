@@ -10,8 +10,8 @@ use winit::window::{Window, WindowId};
 
 use crate::gameloop::Gameloop;
 use crate::net::NetHandle;
-use shared::state::gamestate::{GameState, Status};
 use crate::systems::render::Render;
+use shared::state::gamestate::{GameState, Status};
 
 mod gameloop;
 mod net;
@@ -37,7 +37,8 @@ impl ApplicationHandler for App {
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
         let window = {
             let size = LogicalSize::new(400.0, 300.0);
-            let scaled_size = LogicalSize::new(shared::WIDTH as f64 * 3.0, shared::HEIGHT as f64 * 3.0);
+            let scaled_size =
+                LogicalSize::new(shared::WIDTH as f64 * 3.0, shared::HEIGHT as f64 * 3.0);
             Arc::new(
                 event_loop
                     .create_window(
@@ -60,7 +61,8 @@ impl ApplicationHandler for App {
                 window_size.height,
                 Arc::clone(self.window.as_ref().unwrap()),
             );
-            let mut p = Pixels::new(shared::WIDTH, shared::HEIGHT, surface_texture).expect("Pixel creation failed");
+            let mut p = Pixels::new(shared::WIDTH, shared::HEIGHT, surface_texture)
+                .expect("Pixel creation failed");
             p.clear_color(pixels::wgpu::Color {
                 r: 0.018,
                 g: 0.0,
@@ -103,14 +105,27 @@ impl ApplicationHandler for App {
             // match gs.status {}
         }
     }
+
+    // Implementation to look for closing window after key press does continuous checks
+    fn about_to_wait(&mut self, event_loop: &ActiveEventLoop) {
+        let gs = self.state.read().unwrap();
+        if let Status::Exit = gs.status {
+            println!("Game loop requested exit. Closing OS window wrapper.");
+            event_loop.exit();
+        }
+
+        if let Some(window) = &self.window {
+            window.request_redraw();
+        }
+    }
 }
 
 fn main() {
     let (tx, rx) = std::sync::mpsc::channel();
-    
+
     std::thread::spawn(move || {
         let sys = actix_rt::System::new();
-        
+
         sys.block_on(async move {
             match net::connect().await {
                 Ok((handle, player_id)) => {
@@ -121,7 +136,7 @@ fn main() {
                 }
             }
         });
-        
+
         sys.run().unwrap();
     });
 
@@ -152,7 +167,7 @@ fn run(handle: NetHandle, player_id: u8) {
         ticks: Duration::from_millis(16),
         last_update: Instant::now(),
     };
-    
+
     let _game_loop = std::thread::spawn(move || {
         std::thread::sleep(Duration::from_millis(500));
         gameloop.last_update = Instant::now();
