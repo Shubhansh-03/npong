@@ -39,32 +39,65 @@ impl GameState {
 
     pub fn handle_input(&mut self, input: &GameInput, delta: u128) {
         if let Status::Running = self.status {
-            let mut local_movement = false;
-            let local_idx = (self.player_id - 1) as usize;
+            let mut paddle1_movement = false;
+            let mut paddle2_movement = false;
 
-            // Invert movement according to which paddle it is
-            if local_idx == 0 {
-                if input.left_pressed {
-                    self.objects.paddles[local_idx].left_shift(delta);
-                    local_movement = true;
+            // Offline (singleplayer) mode
+            if self.player_id == 0 {
+                if input.p1_left_pressed {
+                    self.objects.paddles[0].left_shift(delta);
+                    paddle1_movement = true;
                 }
-                if input.right_pressed {
-                    self.objects.paddles[local_idx].right_shift(delta);
-                    local_movement = true;
+                if input.p1_right_pressed {
+                    self.objects.paddles[0].right_shift(delta);
+                    paddle1_movement = true;
+                }
+                if input.p2_left_pressed {
+                    self.objects.paddles[1].left_shift(delta);
+                    paddle2_movement = true;
+                }
+                if input.p2_right_pressed {
+                    self.objects.paddles[1].right_shift(delta);
+                    paddle2_movement = true;
                 }
             } else {
-                if input.left_pressed {
-                    self.objects.paddles[local_idx].right_shift(delta);
-                    local_movement = true;
+                // Multiplayer mode
+                let local_idx = (self.player_id - 1) as usize;
+                let mut local_movement = false;
+
+                // Invert movement according to which paddle it is
+                if local_idx == 0 {
+                    if input.p1_left_pressed {
+                        self.objects.paddles[local_idx].left_shift(delta);
+                        local_movement = true;
+                    }
+                    if input.p1_right_pressed {
+                        self.objects.paddles[local_idx].right_shift(delta);
+                        local_movement = true;
+                    }
+                } else {
+                    if input.p1_left_pressed {
+                        self.objects.paddles[local_idx].right_shift(delta);
+                        local_movement = true;
+                    }
+                    if input.p1_right_pressed {
+                        self.objects.paddles[local_idx].left_shift(delta);
+                        local_movement = true;
+                    }
                 }
-                if input.right_pressed {
-                    self.objects.paddles[local_idx].left_shift(delta);
-                    local_movement = true;
+
+                if local_idx == 0 {
+                    paddle1_movement = local_movement;
+                } else {
+                    paddle2_movement = local_movement;
                 }
             }
 
-            if !local_movement {
-                self.objects.paddles[local_idx].acceleration = 0.0;
+            if !paddle1_movement {
+                self.objects.paddles[0].acceleration = 0.0;
+            }
+            if !paddle2_movement {
+                self.objects.paddles[1].acceleration = 0.0;
             }
 
             if input.pause_toggled {

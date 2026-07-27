@@ -16,7 +16,7 @@ impl Gameloop {
         &mut self,
         state: Arc<RwLock<GameState>>,
         inputs: Arc<RwLock<Input>>,
-        handle: NetHandle,
+        handle: Option<NetHandle>,
     ) {
         loop {
             let now = Instant::now();
@@ -32,25 +32,40 @@ impl Gameloop {
                 if let Status::Exit = gs.status {
                     break;
                 }
-                // If the game is running, handle network sync
                 if let Status::Running = gs.status {
-                    // Send local paddle x to server
-                    let local_paddle_idx = (gs.player_id - 1) as usize;
-                    let (local_x, _) = gs.objects.paddles[local_paddle_idx].position.get_cartesian();
-                    handle.send(crate::net::ClientMsg { paddle_x: local_x });
-                    
-                    // Receive latest server state and apply to opponent's paddle
-                    while let Some(server_msg) = handle.try_recv() {
-                        let remote_paddle_idx = if gs.player_id == 1 { 1 } else { 0 };
-                        let remote_x = if gs.player_id == 1 { server_msg.p2_x } else { server_msg.p1_x };
-                        
-                        let (_, y) = gs.objects.paddles[remote_paddle_idx].position.get_cartesian();
-                        gs.objects.paddles[remote_paddle_idx].position = shared::coordinates::Coordinate::from_cartesian(remote_x, y);
-                        
-                        gs.objects.ball.position = shared::coordinates::Coordinate::from_cartesian(server_msg.ball_x, server_msg.ball_y);
+                    if let Some(ref handle) = handle {
+                        // Send local paddle x to server
+                        let local_paddle_idx = (gs.player_id - 1) as usize;
+                        let (local_x, _) = gs.objects.paddles[local_paddle_idx]
+                            .position
+                            .get_cartesian();
+                        handle.send(crate::net::ClientMsg { paddle_x: local_x });
+
+                        // Receive latest server state and apply to opponent's paddle
+                        while let Some(server_msg) = handle.try_recv() {
+                            let remote_paddle_idx = if gs.player_id == 1 { 1 } else { 0 };
+                            let remote_x = if gs.player_id == 1 {
+                                server_msg.p2_x
+                            } else {
+                                server_msg.p1_x
+                            };
+
+                            let (_, y) = gs.objects.paddles[remote_paddle_idx]
+                                .position
+                                .get_cartesian();
+                            gs.objects.paddles[remote_paddle_idx].position =
+                                shared::coordinates::Coordinate::from_cartesian(remote_x, y);
+
+                            gs.objects.ball.position = shared::coordinates::Coordinate::from_cartesian(
+                                server_msg.ball_x,
+                                server_msg.ball_y,
+                            );
+                        }
+                    } else {
+                        gs.update(delta);
                     }
                 }
-                
+
                 // Unlock so winit can redraw
                 drop(gs);
                 drop(inputs_lock);

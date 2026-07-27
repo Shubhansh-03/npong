@@ -121,6 +121,23 @@ impl ApplicationHandler for App {
 }
 
 fn main() {
+    use std::io::{self, Write};
+    
+    print!("Select game mode - (o)ffline or (m)ultiplayer? [m]: ");
+    io::stdout().flush().unwrap();
+    
+    let mut input = String::new();
+    io::stdin().read_line(&mut input).unwrap();
+    let mode = input.trim().to_lowercase();
+    
+    if mode == "o" || mode == "offline" {
+        println!("Starting offline singleplayer mode...");
+        run(None, 0);
+        return;
+    }
+    
+    println!("Starting multiplayer mode. Connecting to server...");
+
     let (tx, rx) = std::sync::mpsc::channel();
 
     std::thread::spawn(move || {
@@ -142,13 +159,13 @@ fn main() {
 
     match rx.recv().unwrap() {
         Ok((handle, player_id)) => {
-            run(handle, player_id);
+            run(Some(handle), player_id);
         }
         Err(err) => println!("{}", err),
     }
 }
 
-fn run(handle: NetHandle, player_id: u8) {
+fn run(handle: Option<NetHandle>, player_id: u8) {
     let event_loop = EventLoop::new().unwrap();
 
     // ControlFlow::Poll continuously runs the event loop, even if the OS hasn't

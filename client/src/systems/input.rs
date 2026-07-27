@@ -25,10 +25,11 @@ impl Input {
 
     pub fn to_game_input(&self) -> shared::input::GameInput {
         shared::input::GameInput {
-            left_pressed: self.pressed.contains(&KeyCode::KeyA)
-                || self.pressed.contains(&KeyCode::ArrowLeft),
-            right_pressed: self.pressed.contains(&KeyCode::KeyD)
-                || self.pressed.contains(&KeyCode::ArrowRight),
+            p1_left_pressed: self.pressed.contains(&KeyCode::KeyA)
+                || self.pressed.contains(&KeyCode::KeyW),
+            p1_right_pressed: self.pressed.contains(&KeyCode::KeyD),
+            p2_left_pressed: self.pressed.contains(&KeyCode::ArrowLeft),
+            p2_right_pressed: self.pressed.contains(&KeyCode::ArrowRight),
             pause_toggled: self.toggled.contains(&KeyCode::Space),
             quit_game: self.toggled.contains(&KeyCode::KeyQ),
         }

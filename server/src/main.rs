@@ -180,7 +180,7 @@ async fn broadcast_loop(lobby: web::Data<Arc<Mutex<Lobby>>>) {
 async fn physics_loop(lobby: web::Data<Arc<Mutex<Lobby>>>) {
     let mut interval = actix_rt::time::interval(Duration::from_millis(16)); // ~60fps
     let mut last_update = std::time::Instant::now();
-    loop {
+    'gameupdate: loop {
         interval.tick().await;
         let now = std::time::Instant::now();
         let delta = now.duration_since(last_update).as_millis();
